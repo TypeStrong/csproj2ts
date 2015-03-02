@@ -23,14 +23,16 @@ exports.testGroup = {
         });
     },
     find_default_settings: function (test) {
-        test.expect(3);
+        test.expect(4);
         var vsProjInfo = {
-            ProjectFileName: "tests/artifacts/example1.csproj"
+            ProjectFileName: "tests/artifacts/example1.csproj",
         };
         csproj2ts.getTypeScriptSettings(vsProjInfo, function (settings, error) {
             test.ok(!!settings, "Expected settings to have a value.");
             test.equal(settings.VSProjectDetails.DefaultConfiguration, "Debug", "Expected 'Debug' to be the default config.");
             test.equal(settings.VSProjectDetails.DefaultVisualStudioVersion, "12.0", "Expected '12.0' to be the default VS version.");
+            var programFiles = csproj2ts.programFiles();
+            test.equal(settings.VSProjectDetails.MSBuildExtensionsPath32, programFiles + "\\MSBuild\\", "Expected correct value to be automatically set for MSBuildExtensionsPath32.");
             test.done();
         });
     },

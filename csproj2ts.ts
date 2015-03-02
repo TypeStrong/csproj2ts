@@ -1,6 +1,7 @@
 ﻿import fs = require('fs');
 import xml2js = require('xml2js');
 import _ = require("lodash");
+import path = require("path");
 
 module csproj2ts {
     interface TypeScriptSettings {
@@ -27,6 +28,10 @@ module csproj2ts {
     }
 
     export var getTypeScriptSettings = (projectInfo: VSProjectInfo, callback: (settings: TypeScriptSettings, error: NodeJS.ErrnoException) => void): void => {
+
+        if (!projectInfo.MSBuildExtensionsPath32) {
+            projectInfo.MSBuildExtensionsPath32 = path.join(programFiles(), "/MSBuild/");
+        }
 
         var parser = new xml2js.Parser();
         parser.addListener('end', function (parsedVSProject) {
@@ -93,7 +98,6 @@ module csproj2ts {
                     if (subitem.Condition) {
                         var condition = subitem.Condition.replace(/ /g, '');
                         if (condition === defaultCondition) {
-                            console.log(item[nodeName]);
                             result = item[nodeName][0]["_"] + "";
                         }
                     }
@@ -108,6 +112,10 @@ module csproj2ts {
     }
     var getDefaultConfiguration = (project: any): string => {
         return getVSConfigDefault(project, "PropertyGroup", "Configuration", "'$(Configuration)'==''");
+    }
+
+    export var programFiles = () : string => {
+        return process.env["ProgramFiles(x86)"] || process.env["ProgramFiles"] || "";
     }
 
 }
