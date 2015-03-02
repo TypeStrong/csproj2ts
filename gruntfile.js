@@ -6,7 +6,8 @@
                 options: {
                     target: 'es5',
                     module: 'commonjs',
-                    sourceMap: false
+                    sourceMap: false,
+                    noImplicitAny: true
                 }
             }
         },
