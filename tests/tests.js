@@ -11,10 +11,12 @@ exports.testGroup = {
         test.ok(true, "Expected tests to run at all.");
         test.done();
     },
-    try_to_run_something: function (test) {
-        test.expect(1);
-        var settings = csproj2ts.getTypeScriptSettings("artifacts/example1.csproj");
-        test.ok(!!settings, "Expected settings to have a value.");
-        test.done();
+    non_existent_file_returns_null_and_error_message: function (test) {
+        test.expect(2);
+        csproj2ts.getTypeScriptSettings("tests/artifacts/this_does_not_exist.csproj", function (settings, error) {
+            test.equal(settings, null, "Expected settings to be null.");
+            test.equal(error.errno, 34, "Expected file not found error.");
+            test.done();
+        });
     }
 };

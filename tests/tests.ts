@@ -13,10 +13,21 @@ export var testGroup: nodeunit.ITestGroup = {
         test.ok(true, "Expected tests to run at all.");
         test.done();
     },
-    try_to_run_something: function (test: nodeunit.Test) {
-        test.expect(1);
-        var settings = csproj2ts.getTypeScriptSettings("artifacts/example1.csproj");
-        test.ok(!!settings, "Expected settings to have a value.");
-        test.done();
+    non_existent_file_returns_null_and_error_message: function (test: nodeunit.Test) {
+        test.expect(2);
+        csproj2ts.getTypeScriptSettings("tests/artifacts/this_does_not_exist.csproj",(settings, error) => {
+            test.equal(settings, null, "Expected settings to be null.");
+            test.equal(error.errno, 34, "Expected file not found error.");
+            test.done();
+        });
     }
+    //}    ,
+    //try_to_run_something: function (test: nodeunit.Test) {
+    //    test.expect(1);
+    //    csproj2ts.getTypeScriptSettings("tests/artifacts/example1.csproj",(settings) => {
+    //        test.ok(!!settings, "Expected settings to have a value.");
+    //        test.equal(settings.configurations.length,3, "Expected 3 configs.");
+    //        test.done();
+    //    });
+    //}
 }
