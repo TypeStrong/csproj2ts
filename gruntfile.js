@@ -2,15 +2,20 @@
     grunt.initConfig({
         ts: {
             default: {
-                src: ["**/*.ts", "!node_modules/**/*.ts"]
+                src: ["**/*.ts", "!node_modules/**/*.ts"],
+                options: {
+                    target: 'es5',
+                    module: 'commonjs',
+                    sourceMap: false
+                }
             }
         },
         nodeunit: {
-            test: ['tests/tests.js']
+            all: ['tests/*tests.js']
         }
     });
     grunt.loadNpmTasks("grunt-ts");
     grunt.loadNpmTasks("grunt-contrib-nodeunit");
     grunt.registerTask("default", ["ts"]);
-    grunt.registerTask("test", ["ts","test"]);
+    grunt.registerTask("test", ["ts","nodeunit"]);
 };

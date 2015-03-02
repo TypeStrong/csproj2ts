@@ -45,7 +45,7 @@
   </ProjectExtensions>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
-    <TypeScriptSourceMap>true</TypeScriptSourceMap>
+    <TypeScriptSourceMap>False</TypeScriptSourceMap>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <TypeScriptRemoveComments>true</TypeScriptRemoveComments>
@@ -54,9 +54,14 @@
   <ItemGroup>
     <TypeScriptCompile Include="csproj2ts.ts" />
     <TypeScriptCompile Include="tests\tests.ts" />
+    <TypeScriptCompile Include="typings\nodeunit\nodeunit.d.ts" />
+    <TypeScriptCompile Include="typings\tsd.d.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="gruntfile.js" />
   </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <TypeScriptModuleKind>commonjs</TypeScriptModuleKind>
+  </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
 </Project>
