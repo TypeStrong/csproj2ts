@@ -1,12 +1,10 @@
-﻿/// <reference path="../typings/nodeunit/nodeunit.d.ts" />
-
-import nodeunit = require('nodeunit');
+﻿import nodeunit = require('nodeunit');
 
 export var testGroup: nodeunit.ITestGroup = {
-    setUp: function (callback: nodeunit.ICallbackFunction) {
+    setUp: function (callback) {
 	    callback();
 	},
-    tearDown: function (callback: nodeunit.ICallbackFunction) {
+    tearDown: function (callback) {
 	    callback();
 	},
     tests_run_at_all: function (test: nodeunit.Test) {
