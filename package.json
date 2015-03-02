@@ -1,0 +1,30 @@
+{
+  "name": "csproj2ts",
+  "version": "0.0.1",
+  "description": "Library to parse TypeScript config info from a Visual Studio Project file",
+  "main": "index.js",
+  "dependencies": {
+    "xml-parser": "^1.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nycdotnet/csproj2ts.git"
+  },
+  "keywords": [
+    "typescript",
+    "visual",
+    "studio",
+    "csproj",
+    "vbproj"
+  ],
+  "author": "Steve Ognibene",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nycdotnet/csproj2ts/issues"
+  },
+  "homepage": "https://github.com/nycdotnet/csproj2ts"
+}
