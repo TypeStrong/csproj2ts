@@ -6,7 +6,11 @@
   "dependencies": {
     "xml-parser": "^1.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-nodeunit": "^0.4.1",
+    "grunt-ts": "^3.0.0"
+  },
   "scripts": {
     "test": "grunt test"
   },
