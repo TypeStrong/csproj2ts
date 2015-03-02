@@ -4,8 +4,7 @@ import _ = require("lodash");
 
 module csproj2ts {
     interface TypeScriptSettings {
-        imports: VSImportElement[];
-        defaultConfiguration: string;
+        VSProjectDetails: VSProjectDetails
     }
 
     interface VSImportElement {
@@ -17,7 +16,13 @@ module csproj2ts {
         ProjectFileName: string;
         MSBuildExtensionsPath32?: string;
         VisualStudioVersion?: string;
-        Configuration?: string;
+        ActiveConfiguration?: string;
+        
+    }
+
+    export interface VSProjectDetails extends VSProjectInfo {
+        DefaultConfiguration?: string;
+        imports: VSImportElement[];
     }
 
     export var getTypeScriptSettings = (projectInfo: VSProjectInfo, callback: (settings: TypeScriptSettings, error: NodeJS.ErrnoException) => void): void => {
@@ -30,8 +35,14 @@ module csproj2ts {
             } else {
                 var project = parsedVSProject.Project;
                 var result: TypeScriptSettings = {
-                    defaultConfiguration: getDefaultConfiguration(project),
-                    imports: getImports(project)
+                    VSProjectDetails: {
+                        DefaultConfiguration: getDefaultConfiguration(project),
+                        imports: getImports(project),
+                        ActiveConfiguration: projectInfo.ActiveConfiguration,
+                        MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
+                        ProjectFileName : projectInfo.ProjectFileName,
+                        VisualStudioVersion : projectInfo.VisualStudioVersion
+                    }
                 };
 
                 callback(result, null);
@@ -75,9 +86,6 @@ module csproj2ts {
         if (project.PropertyGroup) {
             var propertyGroupItems = toArray(project.PropertyGroup);
             _.map(propertyGroupItems,(item) => {
-                //if (item["$"]) {
-                //    result.push(item["$"]);
-                //}
                 if (item.Configuration && _.isArray(item.Configuration) &&
                       item.Configuration.length > 0) {
                     var subitem = item.Configuration[0]["$"];

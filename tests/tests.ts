@@ -31,7 +31,7 @@ export var testGroup: nodeunit.ITestGroup = {
         }
         csproj2ts.getTypeScriptSettings(vsProjInfo,(settings, error) => {
             test.ok(!!settings, "Expected settings to have a value.");
-            test.equal(settings.defaultConfiguration, "Debug", "Expected 'Debug' to be the default config.");
+            test.equal(settings.VSProjectDetails.DefaultConfiguration, "Debug", "Expected 'Debug' to be the default config.");
             test.done();
         });
     },
@@ -41,7 +41,7 @@ export var testGroup: nodeunit.ITestGroup = {
             ProjectFileName: "tests/artifacts/example1.csproj"
         }
         csproj2ts.getTypeScriptSettings(vsProjInfo,(settings, error) => {
-            test.equal(settings.imports.length, 4, "Expected 4 imports items.");
+            test.equal(settings.VSProjectDetails.imports.length, 4, "Expected 4 imports items.");
             test.done();
         });
     }

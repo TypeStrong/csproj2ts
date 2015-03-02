@@ -12,8 +12,14 @@ var csproj2ts;
             else {
                 var project = parsedVSProject.Project;
                 var result = {
-                    defaultConfiguration: getDefaultConfiguration(project),
-                    imports: getImports(project)
+                    VSProjectDetails: {
+                        DefaultConfiguration: getDefaultConfiguration(project),
+                        imports: getImports(project),
+                        ActiveConfiguration: projectInfo.ActiveConfiguration,
+                        MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
+                        ProjectFileName: projectInfo.ProjectFileName,
+                        VisualStudioVersion: projectInfo.VisualStudioVersion
+                    }
                 };
                 callback(result, null);
             }
