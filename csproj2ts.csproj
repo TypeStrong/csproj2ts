@@ -55,10 +55,18 @@
     <TypeScriptCompile Include="csproj2ts.ts" />
     <TypeScriptCompile Include="tests\tests.ts" />
     <TypeScriptCompile Include="typings\nodeunit\nodeunit.d.ts" />
+    <TypeScriptCompile Include="typings\node\node.d.ts" />
     <TypeScriptCompile Include="typings\tsd.d.ts" />
+    <TypeScriptCompile Include="typings\xml2js\xml2js.d.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="gruntfile.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="package.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="tsd.json" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptModuleKind>commonjs</TypeScriptModuleKind>

@@ -4,7 +4,7 @@
   "description": "Library to parse TypeScript config info from a Visual Studio Project file",
   "main": "index.js",
   "dependencies": {
-    "xml-parser": "^1.2.0"
+    "xml2js": "^0.4.5"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
