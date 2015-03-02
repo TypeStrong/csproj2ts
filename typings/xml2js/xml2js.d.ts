@@ -16,6 +16,14 @@ declare module 'xml2js' {
             buildObject(rootObj: any): string;
         }
 
+        class Parser {
+            constructor();
+            parseString(xml: string, callback: (err: any, result: any) => void): void;
+            parseString(xml: Buffer, callback?: (err: any, result: any) => void): void;
+            parseString(xml: string, options: Options, callback: (err: any, result: any) => void): void;
+            addListener(eventName: string, callback: (result: any) => void): void;
+        }
+
         interface RenderOptions {
             indent?: string;
             newline?: string;
