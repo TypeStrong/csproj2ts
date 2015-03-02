@@ -24,14 +24,15 @@ export var testGroup: nodeunit.ITestGroup = {
             test.done();
         });
     },
-    find_default_config: function (test: nodeunit.Test) {
-        test.expect(2);
+    find_default_settings: function (test: nodeunit.Test) {
+        test.expect(3);
         var vsProjInfo = {
             ProjectFileName: "tests/artifacts/example1.csproj"
         }
         csproj2ts.getTypeScriptSettings(vsProjInfo,(settings, error) => {
             test.ok(!!settings, "Expected settings to have a value.");
             test.equal(settings.VSProjectDetails.DefaultConfiguration, "Debug", "Expected 'Debug' to be the default config.");
+            test.equal(settings.VSProjectDetails.DefaultVisualStudioVersion, "12.0", "Expected '12.0' to be the default VS version.");
             test.done();
         });
     },

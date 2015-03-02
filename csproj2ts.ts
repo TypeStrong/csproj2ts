@@ -22,6 +22,7 @@ module csproj2ts {
 
     export interface VSProjectDetails extends VSProjectInfo {
         DefaultConfiguration?: string;
+        DefaultVisualStudioVersion?: string;
         imports: VSImportElement[];
     }
 
@@ -37,6 +38,7 @@ module csproj2ts {
                 var result: TypeScriptSettings = {
                     VSProjectDetails: {
                         DefaultConfiguration: getDefaultConfiguration(project),
+                        DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
                         imports: getImports(project),
                         ActiveConfiguration: projectInfo.ActiveConfiguration,
                         MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
@@ -81,27 +83,32 @@ module csproj2ts {
         return result;
     }
 
-    var getDefaultConfiguration = (project: any): string => {
+    var getVSConfigDefault = (project: any, typeOfGrouping: string, nodeName: string, defaultCondition: string): string => {
         var result: string = "";
-        if (project.PropertyGroup) {
-            var propertyGroupItems = toArray(project.PropertyGroup);
-            _.map(propertyGroupItems,(item) => {
-                if (item.Configuration && _.isArray(item.Configuration) &&
-                      item.Configuration.length > 0) {
-                    var subitem = item.Configuration[0]["$"];
+        if (project[typeOfGrouping]) {
+            var items = toArray(project[typeOfGrouping]);
+            _.map(items,(item) => {
+                if (item[nodeName] && _.isArray(item[nodeName]) && item[nodeName].length > 0) {
+                    var subitem = item[nodeName][0]["$"];
                     if (subitem.Condition) {
                         var condition = subitem.Condition.replace(/ /g, '');
-
-                        if (condition == "'$(Configuration)'==''") {
-                            result = item.Configuration[0]["_"] + "";
+                        if (condition === defaultCondition) {
+                            console.log(item[nodeName]);
+                            result = item[nodeName][0]["_"] + "";
                         }
                     }
                 }
-            })
+            });
         }
         return result;
     }
 
+    var getDefaultVisualStudioVersion = (project: any): string => {
+        return getVSConfigDefault(project, "PropertyGroup", "VisualStudioVersion", "'$(VisualStudioVersion)'==''");
+    }
+    var getDefaultConfiguration = (project: any): string => {
+        return getVSConfigDefault(project, "PropertyGroup", "Configuration", "'$(Configuration)'==''");
+    }
 
 }
 

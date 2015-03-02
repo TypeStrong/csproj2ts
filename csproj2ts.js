@@ -14,6 +14,7 @@ var csproj2ts;
                 var result = {
                     VSProjectDetails: {
                         DefaultConfiguration: getDefaultConfiguration(project),
+                        DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
                         imports: getImports(project),
                         ActiveConfiguration: projectInfo.ActiveConfiguration,
                         MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
@@ -29,6 +30,7 @@ var csproj2ts;
                 callback(null, err);
             }
             else {
+                //todo: try/catch here
                 parser.parseString(data);
             }
         });
@@ -53,23 +55,30 @@ var csproj2ts;
         }
         return result;
     };
-    var getDefaultConfiguration = function (project) {
+    var getVSConfigDefault = function (project, typeOfGrouping, nodeName, defaultCondition) {
         var result = "";
-        if (project.PropertyGroup) {
-            var propertyGroupItems = toArray(project.PropertyGroup);
-            _.map(propertyGroupItems, function (item) {
-                if (item.Configuration && _.isArray(item.Configuration) && item.Configuration.length > 0) {
-                    var subitem = item.Configuration[0]["$"];
+        if (project[typeOfGrouping]) {
+            var items = toArray(project[typeOfGrouping]);
+            _.map(items, function (item) {
+                if (item[nodeName] && _.isArray(item[nodeName]) && item[nodeName].length > 0) {
+                    var subitem = item[nodeName][0]["$"];
                     if (subitem.Condition) {
                         var condition = subitem.Condition.replace(/ /g, '');
-                        if (condition == "'$(Configuration)'==''") {
-                            result = item.Configuration[0]["_"] + "";
+                        if (condition === defaultCondition) {
+                            console.log(item[nodeName]);
+                            result = item[nodeName][0]["_"] + "";
                         }
                     }
                 }
             });
         }
         return result;
+    };
+    var getDefaultVisualStudioVersion = function (project) {
+        return getVSConfigDefault(project, "PropertyGroup", "VisualStudioVersion", "'$(VisualStudioVersion)'==''");
+    };
+    var getDefaultConfiguration = function (project) {
+        return getVSConfigDefault(project, "PropertyGroup", "Configuration", "'$(Configuration)'==''");
     };
 })(csproj2ts || (csproj2ts = {}));
 module.exports = csproj2ts;
