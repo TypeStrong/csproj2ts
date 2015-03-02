@@ -18,5 +18,13 @@ exports.testGroup = {
             test.equal(error.errno, 34, "Expected file not found error.");
             test.done();
         });
+    },
+    try_to_run_something: function (test) {
+        test.expect(2);
+        csproj2ts.getTypeScriptSettings("tests/artifacts/example1.csproj", function (settings, error) {
+            test.ok(!!settings, "Expected settings to have a value.");
+            test.equal(settings.configurations.length, 3, "Expected 3 configs.");
+            test.done();
+        });
     }
 };

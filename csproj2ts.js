@@ -11,7 +11,7 @@ var csproj2ts;
             callback(temp, null);
         });
         fs.readFile(projectFile, function (err, data) {
-            if (err.errno !== 0) {
+            if (err && err.errno !== 0) {
                 callback(null, err);
             }
             else {

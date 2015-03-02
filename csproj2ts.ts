@@ -21,7 +21,7 @@ module csproj2ts {
         fs.readFile(projectFile, function (err, data) {
             //console.log(data);
             //console.log(err);
-            if (err.errno !== 0) {
+            if (err && err.errno !== 0) {
                 callback(null, err);
             } else {
                 //todo: try/catch here
