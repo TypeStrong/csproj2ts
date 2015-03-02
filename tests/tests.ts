@@ -15,17 +15,33 @@ export var testGroup: nodeunit.ITestGroup = {
     },
     non_existent_file_returns_null_and_error_message: function (test: nodeunit.Test) {
         test.expect(2);
-        csproj2ts.getTypeScriptSettings("tests/artifacts/this_does_not_exist.csproj",(settings, error) => {
+        var vsProjInfo = {
+            ProjectFileName: "tests/artifacts/this_does_not_exist.csproj"
+        }
+        csproj2ts.getTypeScriptSettings(vsProjInfo,(settings, error) => {
             test.equal(settings, null, "Expected settings to be null.");
             test.equal(error.errno, 34, "Expected file not found error.");
             test.done();
         });
     },
-    try_to_run_something: function (test: nodeunit.Test) {
+    find_default_config: function (test: nodeunit.Test) {
         test.expect(2);
-        csproj2ts.getTypeScriptSettings("tests/artifacts/example1.csproj",(settings, error) => {
+        var vsProjInfo = {
+            ProjectFileName: "tests/artifacts/example1.csproj"
+        }
+        csproj2ts.getTypeScriptSettings(vsProjInfo,(settings, error) => {
             test.ok(!!settings, "Expected settings to have a value.");
-            test.equal(settings.configurations.length, 3, "Expected 3 configs.");
+            test.equal(settings.defaultConfiguration, "Debug", "Expected 'Debug' to be the default config.");
+            test.done();
+        });
+    },
+    find_import_items: function (test: nodeunit.Test) {
+        test.expect(1);
+        var vsProjInfo = {
+            ProjectFileName: "tests/artifacts/example1.csproj"
+        }
+        csproj2ts.getTypeScriptSettings(vsProjInfo,(settings, error) => {
+            test.equal(settings.imports.length, 4, "Expected 4 imports items.");
             test.done();
         });
     }

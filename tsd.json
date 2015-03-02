@@ -13,6 +13,9 @@
     },
     "xml2js/xml2js.d.ts": {
       "commit": "3882d337bb0808cde9fe4c08012508a48c135482"
+    },
+    "lodash/lodash.d.ts": {
+      "commit": "3882d337bb0808cde9fe4c08012508a48c135482"
     }
   }
 }

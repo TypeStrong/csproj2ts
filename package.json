@@ -4,6 +4,7 @@
   "description": "Library to parse TypeScript config info from a Visual Studio Project file",
   "main": "index.js",
   "dependencies": {
+    "lodash": "^3.3.1",
     "xml2js": "^0.4.5"
   },
   "devDependencies": {
