@@ -19,6 +19,8 @@ var csproj2ts;
                     VSProjectDetails: {
                         DefaultConfiguration: getDefaultConfiguration(project),
                         DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
+                        TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
+                        NormalizedTypeScriptDefaultPropsFilePath: "",
                         imports: getImports(project),
                         ActiveConfiguration: projectInfo.ActiveConfiguration,
                         MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
@@ -26,6 +28,7 @@ var csproj2ts;
                         VisualStudioVersion: projectInfo.VisualStudioVersion
                     }
                 };
+                normalizePaths(result);
                 callback(result, null);
             }
         });
@@ -37,6 +40,18 @@ var csproj2ts;
                 parser.parseString(data);
             }
         });
+    };
+    var normalizePaths = function (settings) {
+        settings.VSProjectDetails.NormalizedTypeScriptDefaultPropsFilePath = normalizePath(settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, settings);
+    };
+    var normalizePath = function (path, settings) {
+        if (path.indexOf("$(VisualStudioVersion)") > -1) {
+            path = path.replace(/\$\(VisualStudioVersion\)/g, settings.VSProjectDetails.VisualStudioVersion || settings.VSProjectDetails.DefaultVisualStudioVersion);
+        }
+        if (path.indexOf("$(MSBuildExtensionsPath32)") > -1) {
+            path = path.replace(/\$\(MSBuildExtensionsPath32\)/g, settings.VSProjectDetails.MSBuildExtensionsPath32);
+        }
+        return path;
     };
     var toArray = function (itemOrArray) {
         if (_.isArray(itemOrArray)) {
@@ -67,7 +82,7 @@ var csproj2ts;
                     var subitem = item[nodeName][0]["$"];
                     if (subitem.Condition) {
                         var condition = subitem.Condition.replace(/ /g, '');
-                        if (condition === defaultCondition) {
+                        if (defaultCondition.indexOf(condition) > -1 || !defaultCondition) {
                             result = item[nodeName][0]["_"] + "";
                         }
                     }
@@ -81,6 +96,22 @@ var csproj2ts;
     };
     var getDefaultConfiguration = function (project) {
         return getVSConfigDefault(project, "PropertyGroup", "Configuration", "'$(Configuration)'==''");
+    };
+    var getTypeScriptDefaultPropsFilePath = function (project) {
+        var typeOfGrouping = "Import";
+        var result = "";
+        if (project[typeOfGrouping]) {
+            var items = toArray(project[typeOfGrouping]);
+            _.map(items, function (item) {
+                if (item["$"] && item["$"]["Project"]) {
+                    var projectValue = item["$"]["Project"];
+                    if (projectValue.indexOf("Microsoft.TypeScript.Default.props") > -1) {
+                        result = projectValue;
+                    }
+                }
+            });
+        }
+        return result;
     };
     csproj2ts.programFiles = function () {
         return process.env["ProgramFiles(x86)"] || process.env["ProgramFiles"] || "";

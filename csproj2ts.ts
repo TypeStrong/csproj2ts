@@ -13,21 +13,22 @@ module csproj2ts {
         Condition?: string;
     }
 
-    export interface VSProjectInfo {
+    export interface VSProjectParams {
         ProjectFileName: string;
         MSBuildExtensionsPath32?: string;
         VisualStudioVersion?: string;
         ActiveConfiguration?: string;
-        
     }
 
-    export interface VSProjectDetails extends VSProjectInfo {
+    export interface VSProjectDetails extends VSProjectParams {
         DefaultConfiguration?: string;
         DefaultVisualStudioVersion?: string;
         imports: VSImportElement[];
+        TypeScriptDefaultPropsFilePath: string;
+        NormalizedTypeScriptDefaultPropsFilePath: string;
     }
 
-    export var getTypeScriptSettings = (projectInfo: VSProjectInfo, callback: (settings: TypeScriptSettings, error: NodeJS.ErrnoException) => void): void => {
+    export var getTypeScriptSettings = (projectInfo: VSProjectParams, callback: (settings: TypeScriptSettings, error: NodeJS.ErrnoException) => void): void => {
 
         if (!projectInfo.MSBuildExtensionsPath32) {
             projectInfo.MSBuildExtensionsPath32 = path.join(programFiles(), "/MSBuild/");
@@ -44,6 +45,8 @@ module csproj2ts {
                     VSProjectDetails: {
                         DefaultConfiguration: getDefaultConfiguration(project),
                         DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
+                        TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
+                        NormalizedTypeScriptDefaultPropsFilePath: "",
                         imports: getImports(project),
                         ActiveConfiguration: projectInfo.ActiveConfiguration,
                         MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
@@ -51,6 +54,8 @@ module csproj2ts {
                         VisualStudioVersion : projectInfo.VisualStudioVersion
                     }
                 };
+
+                normalizePaths(result);
 
                 callback(result, null);
             }
@@ -65,6 +70,28 @@ module csproj2ts {
             }
         });
 
+    }
+
+    var normalizePaths = (settings: TypeScriptSettings) => {
+        settings.VSProjectDetails.NormalizedTypeScriptDefaultPropsFilePath = normalizePath(
+            settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, settings
+            );
+    }
+
+    var normalizePath = (path: string, settings: TypeScriptSettings) : string => {
+        if (path.indexOf("$(VisualStudioVersion)") > -1) {
+            path = path.replace(/\$\(VisualStudioVersion\)/g,
+                settings.VSProjectDetails.VisualStudioVersion || settings.VSProjectDetails.DefaultVisualStudioVersion
+                );
+        }
+
+        if (path.indexOf("$(MSBuildExtensionsPath32)") > -1) {
+            path = path.replace(/\$\(MSBuildExtensionsPath32\)/g,
+                settings.VSProjectDetails.MSBuildExtensionsPath32
+                );
+            //path = path.replace(/\\\\/g, "\\"); //fix extra backslashes in path
+        }
+        return path;
     }
 
     var toArray = <T>(itemOrArray: T | T[]): T[] => {
@@ -97,7 +124,7 @@ module csproj2ts {
                     var subitem = item[nodeName][0]["$"];
                     if (subitem.Condition) {
                         var condition = subitem.Condition.replace(/ /g, '');
-                        if (condition === defaultCondition) {
+                        if (defaultCondition.indexOf(condition) > -1 || !defaultCondition) {
                             result = item[nodeName][0]["_"] + "";
                         }
                     }
@@ -112,6 +139,24 @@ module csproj2ts {
     }
     var getDefaultConfiguration = (project: any): string => {
         return getVSConfigDefault(project, "PropertyGroup", "Configuration", "'$(Configuration)'==''");
+    }
+
+    var getTypeScriptDefaultPropsFilePath = (project: any): string => {
+        //return getVSConfigDefault(project, "Import", "Project","");
+        var typeOfGrouping = "Import"
+        var result: string = "";
+        if (project[typeOfGrouping]) {
+            var items = toArray(project[typeOfGrouping]);
+            _.map(items,(item) => {
+                if (item["$"] && item["$"]["Project"]) {
+                    var projectValue: string = item["$"]["Project"];
+                    if (projectValue.indexOf("Microsoft.TypeScript.Default.props") > -1) {
+                        result = projectValue;
+                    }
+                }
+            });
+        }
+        return result;
     }
 
     export var programFiles = () : string => {
