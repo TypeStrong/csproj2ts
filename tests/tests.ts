@@ -4,18 +4,18 @@ import csproj2ts = require('../csproj2ts');
 var programFiles = csproj2ts.programFiles();
 
 export var testGroup: nodeunit.ITestGroup = {
-    setUp: function (callback) {
+    setUp: (callback) => {
         callback();
     },
-    tearDown: function (callback) {
+    tearDown: (callback) => {
         callback();
     },
-    tests_run_at_all: function (test: nodeunit.Test) {
+    tests_run_at_all: (test: nodeunit.Test) => {
         test.expect(1);
         test.ok(true, "Expected tests to run at all.");
         test.done();
     },
-    non_existent_file_returns_null_and_error_message: function (test: nodeunit.Test) {
+    non_existent_file_returns_null_and_error_message: (test: nodeunit.Test) => {
         test.expect(2);
         var vsProjInfo = {
             ProjectFileName: "tests/artifacts/this_does_not_exist.csproj"
@@ -26,7 +26,7 @@ export var testGroup: nodeunit.ITestGroup = {
             test.done();
         });
     },
-    find_default_settings: function (test: nodeunit.Test) {
+    find_default_settings: (test: nodeunit.Test) => {
         test.expect(4);
         var vsProjInfo = {
             ProjectFileName: "tests/artifacts/example1.csproj",
@@ -39,7 +39,7 @@ export var testGroup: nodeunit.ITestGroup = {
             test.done();
         });
     },
-    find_import_items: function (test: nodeunit.Test) {
+    find_import_items: (test: nodeunit.Test) => {
         test.expect(1);
         var vsProjInfo = {
             ProjectFileName: "tests/artifacts/example1.csproj"
@@ -49,7 +49,7 @@ export var testGroup: nodeunit.ITestGroup = {
             test.done();
         });
     },
-    find_TypeScript_default_props_file: function (test: nodeunit.Test) {
+    find_TypeScript_default_props_file: (test: nodeunit.Test) => {
         test.expect(1);
         var vsProjInfo = {
             ProjectFileName: "tests/artifacts/example1.csproj"
@@ -61,7 +61,7 @@ export var testGroup: nodeunit.ITestGroup = {
             test.done();
         });
     },
-    identify_all_typeScript_files_properly: function (test: nodeunit.Test) {
+    identify_all_typeScript_files_properly: (test: nodeunit.Test) => {
         test.expect(2);
         var vsProjInfo = {
             ProjectFileName: "tests/artifacts/example1.csproj"
