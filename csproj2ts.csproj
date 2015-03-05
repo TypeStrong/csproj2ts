@@ -54,6 +54,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="csproj2ts.ts" />
     <TypeScriptCompile Include="tests\tests.ts" />
+    <TypeScriptCompile Include="typings\es6-promise\es6-promise.d.ts" />
     <TypeScriptCompile Include="typings\lodash\lodash.d.ts" />
     <TypeScriptCompile Include="typings\nodeunit\nodeunit.d.ts" />
     <TypeScriptCompile Include="typings\node\node.d.ts" />

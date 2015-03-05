@@ -2,6 +2,8 @@ var fs = require('fs');
 var xml2js = require('xml2js');
 var _ = require("lodash");
 var path = require("path");
+var _PromiseLibrary = require('es6-promise');
+var Promise = _PromiseLibrary.Promise;
 var csproj2ts;
 (function (csproj2ts) {
     csproj2ts.getTypeScriptSettings = function (projectInfo, callback) {
@@ -17,7 +19,7 @@ var csproj2ts;
                 var project = parsedVSProject.Project;
                 var result = {
                     VSProjectDetails: {
-                        DefaultConfiguration: getDefaultConfiguration(project),
+                        DefaultProjectConfiguration: getDefaultConfiguration(project),
                         DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
                         TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
                         NormalizedTypeScriptDefaultPropsFilePath: "",
@@ -25,8 +27,10 @@ var csproj2ts;
                         ActiveConfiguration: projectInfo.ActiveConfiguration,
                         MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
                         ProjectFileName: projectInfo.ProjectFileName,
-                        VisualStudioVersion: projectInfo.VisualStudioVersion
-                    }
+                        VisualStudioVersion: projectInfo.VisualStudioVersion,
+                        TypeScriptDefaultConfiguration: null
+                    },
+                    files: getTypeScriptFilesToCompile(project)
                 };
                 normalizePaths(result);
                 callback(result, null);
@@ -97,6 +101,23 @@ var csproj2ts;
     var getDefaultConfiguration = function (project) {
         return getVSConfigDefault(project, "PropertyGroup", "Configuration", "'$(Configuration)'==''");
     };
+    var getTypeScriptFilesToCompile = function (project) {
+        var typeOfGrouping = "ItemGroup";
+        var result = [];
+        if (project[typeOfGrouping]) {
+            var items = toArray(project[typeOfGrouping]);
+            _.map(items, function (item) {
+                if (item["TypeScriptCompile"]) {
+                    _.map(toArray(item["TypeScriptCompile"]), function (compileItem) {
+                        if (compileItem["$"] && compileItem["$"]["Include"]) {
+                            result.push(compileItem["$"]["Include"]);
+                        }
+                    });
+                }
+            });
+        }
+        return result;
+    };
     var getTypeScriptDefaultPropsFilePath = function (project) {
         var typeOfGrouping = "Import";
         var result = "";
@@ -112,6 +133,9 @@ var csproj2ts;
             });
         }
         return result;
+    };
+    csproj2ts.getTypeScriptDefaultsFromPropsFile = function (propsFileName) {
+        return null;
     };
     csproj2ts.programFiles = function () {
         return process.env["ProgramFiles(x86)"] || process.env["ProgramFiles"] || "";

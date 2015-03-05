@@ -2,10 +2,13 @@
 import xml2js = require('xml2js');
 import _ = require("lodash");
 import path = require("path");
+import _PromiseLibrary = require('es6-promise');
+var Promise = _PromiseLibrary.Promise;
 
 module csproj2ts {
     interface TypeScriptSettings {
-        VSProjectDetails: VSProjectDetails
+        VSProjectDetails: VSProjectDetails;
+        files: string[];
     }
 
     interface VSImportElement {
@@ -21,11 +24,38 @@ module csproj2ts {
     }
 
     export interface VSProjectDetails extends VSProjectParams {
-        DefaultConfiguration?: string;
+        DefaultProjectConfiguration?: string;
         DefaultVisualStudioVersion?: string;
         imports: VSImportElement[];
         TypeScriptDefaultPropsFilePath: string;
         NormalizedTypeScriptDefaultPropsFilePath: string;
+        TypeScriptDefaultConfiguration: TypeScriptConfiguration;
+    }
+
+    /** Configuration tags used by Visual Studio TypeScript Project Properties/MSBuild.
+     * url: * https://github.com/Microsoft/TypeScript/issues/1712#issuecomment-70574319
+     * */
+    export interface TypeScriptConfiguration {
+        AdditionalFlags: string;
+        Charset: string;
+        CodePage: string;
+        CompileOnSaveEnabled: boolean;
+        EmitBOM: boolean;
+        GeneratesDeclarations: boolean;
+        MapRoot: string;
+        ModuleKind: string;
+        NoEmitOnError: boolean;
+        NoImplicitAny: string;
+        NoLib: string;
+        NoResolve: string;
+        OutFile: string;
+        OutDir: string;
+        PreserveConstEnums: boolean;
+        RemoveComments: boolean;
+        SourceMap: boolean;
+        SourceRoot: string;
+        SuppressImplicitAnyIndexErrors: string;
+        Target: string;
     }
 
     export var getTypeScriptSettings = (projectInfo: VSProjectParams, callback: (settings: TypeScriptSettings, error: NodeJS.ErrnoException) => void): void => {
@@ -43,7 +73,7 @@ module csproj2ts {
                 var project = parsedVSProject.Project;
                 var result: TypeScriptSettings = {
                     VSProjectDetails: {
-                        DefaultConfiguration: getDefaultConfiguration(project),
+                        DefaultProjectConfiguration: getDefaultConfiguration(project),
                         DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
                         TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
                         NormalizedTypeScriptDefaultPropsFilePath: "",
@@ -51,9 +81,13 @@ module csproj2ts {
                         ActiveConfiguration: projectInfo.ActiveConfiguration,
                         MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
                         ProjectFileName : projectInfo.ProjectFileName,
-                        VisualStudioVersion : projectInfo.VisualStudioVersion
-                    }
+                        VisualStudioVersion: projectInfo.VisualStudioVersion,
+                        TypeScriptDefaultConfiguration: null
+                    },
+                    files: getTypeScriptFilesToCompile(project)
                 };
+
+                //result.VSProjectDetails.TypeScriptDefaultConfiguration = getTypeScriptDefaultsFromPropsFile(result.VSProjectDetails.NormalizedTypeScriptDefaultPropsFilePath);
 
                 normalizePaths(result);
 
@@ -140,9 +174,25 @@ module csproj2ts {
     var getDefaultConfiguration = (project: any): string => {
         return getVSConfigDefault(project, "PropertyGroup", "Configuration", "'$(Configuration)'==''");
     }
+    var getTypeScriptFilesToCompile = (project: any): string[]=> {
+        var typeOfGrouping = "ItemGroup"
+        var result: string[] = [];
+        if (project[typeOfGrouping]) {
+            var items = toArray(project[typeOfGrouping]);
+            _.map(items,(item) => {
+                if (item["TypeScriptCompile"]) {
+                    _.map(toArray(item["TypeScriptCompile"]),(compileItem) => {
+                        if (compileItem["$"] && compileItem["$"]["Include"]) {
+                            result.push(compileItem["$"]["Include"]);
+                        }
+                    });
+                }
+            });
+        }
+        return result;
+    }
 
     var getTypeScriptDefaultPropsFilePath = (project: any): string => {
-        //return getVSConfigDefault(project, "Import", "Project","");
         var typeOfGrouping = "Import"
         var result: string = "";
         if (project[typeOfGrouping]) {
@@ -157,6 +207,30 @@ module csproj2ts {
             });
         }
         return result;
+    }
+
+    export var getTypeScriptDefaultsFromPropsFile =
+        (propsFileName: string): Promise<TypeScriptConfiguration> => {
+            return null;
+            //return new Promise((resolve, reject) => {
+
+            //}
+
+            //var result: TypeScriptConfiguration;
+        //var parser = new xml2js.Parser();
+        //parser.addListener('end', function (parsedVSProject) {
+        //});
+
+        //fs.readFile(propsFileName, function (err, data) {
+        //    if (err && err.errno !== 0) {
+        //        callback(null, err);
+        //    } else {
+        //        //todo: try/catch here
+        //        parser.parseString(data);
+        //    }
+        //});
+
+        //return result;
     }
 
     export var programFiles = () : string => {
