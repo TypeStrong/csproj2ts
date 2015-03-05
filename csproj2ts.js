@@ -6,43 +6,54 @@ var _PromiseLibrary = require('es6-promise');
 var Promise = _PromiseLibrary.Promise;
 var csproj2ts;
 (function (csproj2ts) {
-    csproj2ts.getTypeScriptSettings = function (projectInfo, callback) {
+    csproj2ts.xml2jsReadXMLFile = function (fileName) {
+        return new Promise(function (resolve, reject) {
+            var parser = new xml2js.Parser();
+            parser.addListener('end', function (parsedXMLFileResult) {
+                resolve(parsedXMLFileResult);
+            });
+            fs.readFile(fileName, function (err, data) {
+                if (err && err.errno !== 0) {
+                    reject(err);
+                }
+                else {
+                    parser.parseString(data);
+                }
+            });
+        });
+    };
+    csproj2ts.getTypeScriptSettings = function (projectInfo) {
         if (!projectInfo.MSBuildExtensionsPath32) {
             projectInfo.MSBuildExtensionsPath32 = path.join(csproj2ts.programFiles(), "/MSBuild/");
         }
-        var parser = new xml2js.Parser();
-        parser.addListener('end', function (parsedVSProject) {
-            if (!parsedVSProject || !parsedVSProject.Project) {
-                callback(null, { name: "", message: "No result from parsing the project." });
-            }
-            else {
-                var project = parsedVSProject.Project;
-                var result = {
-                    VSProjectDetails: {
-                        DefaultProjectConfiguration: getDefaultConfiguration(project),
-                        DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
-                        TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
-                        NormalizedTypeScriptDefaultPropsFilePath: "",
-                        imports: getImports(project),
-                        ActiveConfiguration: projectInfo.ActiveConfiguration,
-                        MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
-                        ProjectFileName: projectInfo.ProjectFileName,
-                        VisualStudioVersion: projectInfo.VisualStudioVersion,
-                        TypeScriptDefaultConfiguration: null
-                    },
-                    files: getTypeScriptFilesToCompile(project)
-                };
-                normalizePaths(result);
-                callback(result, null);
-            }
-        });
-        fs.readFile(projectInfo.ProjectFileName, function (err, data) {
-            if (err && err.errno !== 0) {
-                callback(null, err);
-            }
-            else {
-                parser.parseString(data);
-            }
+        return new Promise(function (resolve, reject) {
+            csproj2ts.xml2jsReadXMLFile(projectInfo.ProjectFileName).then(function (parsedVSProject) {
+                if (!parsedVSProject || !parsedVSProject.Project) {
+                    reject(new Error("No result from parsing the project."));
+                }
+                else {
+                    var project = parsedVSProject.Project;
+                    var result = {
+                        VSProjectDetails: {
+                            DefaultProjectConfiguration: getDefaultConfiguration(project),
+                            DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
+                            TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
+                            NormalizedTypeScriptDefaultPropsFilePath: "",
+                            imports: getImports(project),
+                            ActiveConfiguration: projectInfo.ActiveConfiguration,
+                            MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
+                            ProjectFileName: projectInfo.ProjectFileName,
+                            VisualStudioVersion: projectInfo.VisualStudioVersion,
+                            TypeScriptDefaultConfiguration: null
+                        },
+                        files: getTypeScriptFilesToCompile(project)
+                    };
+                    normalizePaths(result);
+                    resolve(result);
+                }
+            }, function (error) {
+                reject(error);
+            });
         });
     };
     var normalizePaths = function (settings) {

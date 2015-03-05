@@ -58,61 +58,68 @@ module csproj2ts {
         Target: string;
     }
 
-    export var getTypeScriptSettings = (projectInfo: VSProjectParams, callback: (settings: TypeScriptSettings, error: NodeJS.ErrnoException) => void): void => {
+    export var xml2jsReadXMLFile = (fileName: string) : Promise<any> => {
+        return new Promise((resolve, reject) => {
+            var parser = new xml2js.Parser();
+            parser.addListener('end', function (parsedXMLFileResult) {
+                resolve(parsedXMLFileResult);
+            });
+            fs.readFile(fileName, function (err, data) {
+                if (err && err.errno !== 0) {
+                    reject(err);
+                } else {
+                    parser.parseString(data);
+                }
+            });
+
+        });
+    };
+
+    export var getTypeScriptSettings = (projectInfo: VSProjectParams): Promise<TypeScriptSettings> => {
 
         if (!projectInfo.MSBuildExtensionsPath32) {
             projectInfo.MSBuildExtensionsPath32 = path.join(programFiles(), "/MSBuild/");
         }
 
-        var parser = new xml2js.Parser();
-        parser.addListener('end', function (parsedVSProject) {
+        return new Promise((resolve, reject) => {
+            xml2jsReadXMLFile(projectInfo.ProjectFileName).then((parsedVSProject) => {
+                if (!parsedVSProject || !parsedVSProject.Project) {
+                    reject(new Error("No result from parsing the project."));
+                } else {
+                    var project = parsedVSProject.Project;
+                    var result: TypeScriptSettings = {
+                        VSProjectDetails: {
+                            DefaultProjectConfiguration: getDefaultConfiguration(project),
+                            DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
+                            TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
+                            NormalizedTypeScriptDefaultPropsFilePath: "",
+                            imports: getImports(project),
+                            ActiveConfiguration: projectInfo.ActiveConfiguration,
+                            MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
+                            ProjectFileName: projectInfo.ProjectFileName,
+                            VisualStudioVersion: projectInfo.VisualStudioVersion,
+                            TypeScriptDefaultConfiguration: null
+                        },
+                        files: getTypeScriptFilesToCompile(project)
+                    };
 
-            if (!parsedVSProject || !parsedVSProject.Project) {
-                callback(null, { name: "", message: "No result from parsing the project." });
-            } else {
-                var project = parsedVSProject.Project;
-                var result: TypeScriptSettings = {
-                    VSProjectDetails: {
-                        DefaultProjectConfiguration: getDefaultConfiguration(project),
-                        DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
-                        TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
-                        NormalizedTypeScriptDefaultPropsFilePath: "",
-                        imports: getImports(project),
-                        ActiveConfiguration: projectInfo.ActiveConfiguration,
-                        MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
-                        ProjectFileName : projectInfo.ProjectFileName,
-                        VisualStudioVersion: projectInfo.VisualStudioVersion,
-                        TypeScriptDefaultConfiguration: null
-                    },
-                    files: getTypeScriptFilesToCompile(project)
-                };
+                    normalizePaths(result);
 
-                //result.VSProjectDetails.TypeScriptDefaultConfiguration = getTypeScriptDefaultsFromPropsFile(result.VSProjectDetails.NormalizedTypeScriptDefaultPropsFilePath);
-
-                normalizePaths(result);
-
-                callback(result, null);
-            }
-        });
-
-        fs.readFile(projectInfo.ProjectFileName, function (err, data) {
-            if (err && err.errno !== 0) {
-                callback(null, err);
-            } else {
-                //todo: try/catch here
-                parser.parseString(data);
-            }
-        });
-
+                    resolve(result);
+                }
+            },(error) => {
+                    reject(error);
+                });
+            });
     }
 
     var normalizePaths = (settings: TypeScriptSettings) => {
         settings.VSProjectDetails.NormalizedTypeScriptDefaultPropsFilePath = normalizePath(
             settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, settings
             );
-    }
+    };
 
-    var normalizePath = (path: string, settings: TypeScriptSettings) : string => {
+    var normalizePath = (path: string, settings: TypeScriptSettings): string => {
         if (path.indexOf("$(VisualStudioVersion)") > -1) {
             path = path.replace(/\$\(VisualStudioVersion\)/g,
                 settings.VSProjectDetails.VisualStudioVersion || settings.VSProjectDetails.DefaultVisualStudioVersion
@@ -126,7 +133,7 @@ module csproj2ts {
             //path = path.replace(/\\\\/g, "\\"); //fix extra backslashes in path
         }
         return path;
-    }
+    };
 
     var toArray = <T>(itemOrArray: T | T[]): T[] => {
         if (_.isArray(itemOrArray)) {
@@ -147,7 +154,7 @@ module csproj2ts {
             })
         }
         return result;
-    }
+    };
 
     var getVSConfigDefault = (project: any, typeOfGrouping: string, nodeName: string, defaultCondition: string): string => {
         var result: string = "";
@@ -166,14 +173,15 @@ module csproj2ts {
             });
         }
         return result;
-    }
+    };
 
     var getDefaultVisualStudioVersion = (project: any): string => {
         return getVSConfigDefault(project, "PropertyGroup", "VisualStudioVersion", "'$(VisualStudioVersion)'==''");
-    }
+    };
+
     var getDefaultConfiguration = (project: any): string => {
         return getVSConfigDefault(project, "PropertyGroup", "Configuration", "'$(Configuration)'==''");
-    }
+    };
     var getTypeScriptFilesToCompile = (project: any): string[]=> {
         var typeOfGrouping = "ItemGroup"
         var result: string[] = [];
@@ -190,7 +198,7 @@ module csproj2ts {
             });
         }
         return result;
-    }
+    };
 
     var getTypeScriptDefaultPropsFilePath = (project: any): string => {
         var typeOfGrouping = "Import"
@@ -207,7 +215,7 @@ module csproj2ts {
             });
         }
         return result;
-    }
+    };
 
     export var getTypeScriptDefaultsFromPropsFile =
         (propsFileName: string): Promise<TypeScriptConfiguration> => {
@@ -217,25 +225,25 @@ module csproj2ts {
             //}
 
             //var result: TypeScriptConfiguration;
-        //var parser = new xml2js.Parser();
-        //parser.addListener('end', function (parsedVSProject) {
-        //});
+            //var parser = new xml2js.Parser();
+            //parser.addListener('end', function (parsedVSProject) {
+            //});
 
-        //fs.readFile(propsFileName, function (err, data) {
-        //    if (err && err.errno !== 0) {
-        //        callback(null, err);
-        //    } else {
-        //        //todo: try/catch here
-        //        parser.parseString(data);
-        //    }
-        //});
+            //fs.readFile(propsFileName, function (err, data) {
+            //    if (err && err.errno !== 0) {
+            //        callback(null, err);
+            //    } else {
+            //        //todo: try/catch here
+            //        parser.parseString(data);
+            //    }
+            //});
 
-        //return result;
-    }
+            //return result;
+        };
 
-    export var programFiles = () : string => {
+    export var programFiles = (): string => {
         return process.env["ProgramFiles(x86)"] || process.env["ProgramFiles"] || "";
-    }
+    };
 
 }
 
