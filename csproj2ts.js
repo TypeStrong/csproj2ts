@@ -145,8 +145,45 @@ var csproj2ts;
         }
         return result;
     };
+    function str2bool(strvalue) {
+        return (typeof strvalue == 'string' && strvalue) ? (strvalue.toLowerCase() == 'true') : (strvalue == true);
+    }
+    function getFirstValueOrDefault(item, defaultValue) {
+        if (item && _.isArray(item) && item.length > 0 && !_.isNull(item[0]) && !_.isUndefined(item[0])) {
+            if (typeof defaultValue === "boolean") {
+                return str2bool(item[0]);
+            }
+            return item[0];
+        }
+        return defaultValue;
+    }
     csproj2ts.getTypeScriptDefaultsFromPropsFile = function (propsFileName) {
-        return null;
+        return new Promise(function (resolve, reject) {
+            csproj2ts.xml2jsReadXMLFile(propsFileName).then(function (parsedPropertiesFile) {
+                if (!parsedPropertiesFile || !parsedPropertiesFile.Project || !parsedPropertiesFile.Project.PropertyGroup) {
+                    reject(new Error("No result from parsing the project."));
+                }
+                else {
+                    var pg = toArray(parsedPropertiesFile.Project.PropertyGroup)[0];
+                    var result = {};
+                    result.Target = getFirstValueOrDefault(pg.TypeScriptTarget, "ES3");
+                    result.CompileOnSaveEnabled = getFirstValueOrDefault(pg.TypeScriptCompileOnSaveEnabled, false);
+                    result.NoImplicitAny = getFirstValueOrDefault(pg.TypeScriptNoImplicitAny, false);
+                    result.ModuleKind = getFirstValueOrDefault(pg.TypeScriptModuleKind, "");
+                    result.RemoveComments = getFirstValueOrDefault(pg.TypeScriptRemoveComments, false);
+                    result.OutFile = getFirstValueOrDefault(pg.TypeScriptOutFile, "");
+                    result.OutDir = getFirstValueOrDefault(pg.TypeScriptOutDir, "");
+                    result.GeneratesDeclarations = getFirstValueOrDefault(pg.TypeScriptGeneratesDeclarations, false);
+                    result.SourceMap = getFirstValueOrDefault(pg.TypeScriptSourceMap, false);
+                    result.MapRoot = getFirstValueOrDefault(pg.TypeScript, "");
+                    result.SourceRoot = getFirstValueOrDefault(pg.TypeScriptSourceRoot, "");
+                    result.NoEmitOnError = getFirstValueOrDefault(pg.TypeScript, true);
+                    resolve(result);
+                }
+            }, function (error) {
+                reject(error);
+            });
+        });
     };
     csproj2ts.programFiles = function () {
         return process.env["ProgramFiles(x86)"] || process.env["ProgramFiles"] || "";

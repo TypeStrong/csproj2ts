@@ -45,7 +45,7 @@ module csproj2ts {
         MapRoot: string;
         ModuleKind: string;
         NoEmitOnError: boolean;
-        NoImplicitAny: string;
+        NoImplicitAny: boolean;
         NoLib: string;
         NoResolve: string;
         OutFile: string;
@@ -217,28 +217,49 @@ module csproj2ts {
         return result;
     };
 
+    // Thanks: "timo" http://stackoverflow.com/questions/263965/how-can-i-convert-a-string-to-boolean-in-javascript/28152765#28152765
+    function str2bool(strvalue: any) {
+        return (typeof strvalue == 'string' && strvalue) ? (strvalue.toLowerCase() == 'true') : (strvalue == true);
+    }
+
+    function getFirstValueOrDefault<T>(item: any[], defaultValue: T): T {
+        if (item && _.isArray(item) && item.length > 0 && !_.isNull(item[0]) && !_.isUndefined(item[0])) {
+            if (typeof defaultValue === "boolean") {
+                return <T><any>str2bool(item[0]);  //todo: is the requirement to cast here a bug?
+            }
+            return item[0];
+        }
+        return defaultValue;
+    }
+
     export var getTypeScriptDefaultsFromPropsFile =
         (propsFileName: string): Promise<TypeScriptConfiguration> => {
-            return null;
-            //return new Promise((resolve, reject) => {
 
-            //}
+            return new Promise((resolve, reject) => {
+                xml2jsReadXMLFile(propsFileName).then((parsedPropertiesFile) => {
+                    if (!parsedPropertiesFile || !parsedPropertiesFile.Project || !parsedPropertiesFile.Project.PropertyGroup) {
+                        reject(new Error("No result from parsing the project."));
+                    } else {
+                        var pg = toArray(parsedPropertiesFile.Project.PropertyGroup)[0];
+                        var result: TypeScriptConfiguration = <any>{};
 
-            //var result: TypeScriptConfiguration;
-            //var parser = new xml2js.Parser();
-            //parser.addListener('end', function (parsedVSProject) {
-            //});
+                        result.Target = getFirstValueOrDefault(pg.TypeScriptTarget, "ES3");
+                        result.CompileOnSaveEnabled = getFirstValueOrDefault(pg.TypeScriptCompileOnSaveEnabled, false);
+                        result.NoImplicitAny = getFirstValueOrDefault(pg.TypeScriptNoImplicitAny, false);
+                        result.ModuleKind = getFirstValueOrDefault(pg.TypeScriptModuleKind, "");
+                        result.RemoveComments = getFirstValueOrDefault(pg.TypeScriptRemoveComments, false);
+                        result.OutFile = getFirstValueOrDefault(pg.TypeScriptOutFile, "");
+                        result.OutDir = getFirstValueOrDefault(pg.TypeScriptOutDir, "");
+                        result.GeneratesDeclarations = getFirstValueOrDefault(pg.TypeScriptGeneratesDeclarations, false);
+                        result.SourceMap = getFirstValueOrDefault(pg.TypeScriptSourceMap, false);
+                        result.MapRoot = getFirstValueOrDefault(pg.TypeScript, "");
+                        result.SourceRoot = getFirstValueOrDefault(pg.TypeScriptSourceRoot, "");
+                        result.NoEmitOnError = getFirstValueOrDefault(pg.TypeScript, true);
 
-            //fs.readFile(propsFileName, function (err, data) {
-            //    if (err && err.errno !== 0) {
-            //        callback(null, err);
-            //    } else {
-            //        //todo: try/catch here
-            //        parser.parseString(data);
-            //    }
-            //});
-
-            //return result;
+                        resolve(result);
+                    }
+                },(error) => { reject(error); });
+            });
         };
 
     export var programFiles = (): string => {

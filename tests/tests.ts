@@ -91,20 +91,31 @@ export var testGroup: nodeunit.ITestGroup = {
             test.ok(false, "Should not be any errors.");
             test.done();
         });
-    } //,
-    //fetch_default_properties_properly: function (test: nodeunit.Test) {
-    //    test.expect(1);
+    } ,
+    fetch_default_properties_properly: (test: nodeunit.Test) => {
+        test.expect(13);
 
-    //    csproj2ts.getTypeScriptDefaultsFromPropsFile("tests/artifacts/Microsoft.TypeScript.Default.props");
+        csproj2ts.getTypeScriptDefaultsFromPropsFile("tests/artifacts/Microsoft.TypeScript.Default.props")
+            .then((result) => {
 
+            test.equal(result.AdditionalFlags, undefined);
+            test.equal(result.Charset, undefined);
+            test.equal(result.CodePage, undefined);
+            test.equal(result.CompileOnSaveEnabled, true);
+            test.equal(result.EmitBOM, undefined, "expected undefined EmitBOM");
+            test.equal(result.GeneratesDeclarations, false, "expected false GeneratesDeclarations");
+            test.equal(result.MapRoot, "", "expected blank MapRoot");
+            test.equal(result.ModuleKind, "none", "expected 'none' as ModuleKind");
+            test.equal(result.NoEmitOnError, true, "expected true for NoEmitOnError");
+            test.equal(result.NoImplicitAny, false, "expected false for NoImplicitAny");
+            test.equal(result.NoLib, undefined, "expected undefined for NoLib");
+            test.equal(result.NoResolve, undefined, "expected undefined for NoResolve");
+            test.equal(result.OutDir, "", "expected blank for OutDir");
 
-    //    //var vsProjInfo = {
-    //    //    ProjectFileName: "tests/artifacts/example1.csproj"
-    //    //}
-    //    //csproj2ts.getTypeScriptSettings(vsProjInfo,(settings, error) => {
-    //    //    test.equal(settings.files.length, 16, "Expected to see the correct number of TypeScript files.");
-    //    //    test.ok(settings.files.indexOf("tasks\ts.ts") !== 0, "Expected to see tasks\ts.ts in the files list.");
-    //    //    test.done();
-    //    //});
-    //}
+            test.done();
+        }).catch((error) => {
+            test.ok(false, "Should not be any errors.");
+            test.done();
+        });
+    }
 }
