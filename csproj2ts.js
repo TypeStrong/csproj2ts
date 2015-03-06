@@ -63,7 +63,6 @@ var csproj2ts;
                             DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
                             TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
                             NormalizedTypeScriptDefaultPropsFilePath: "",
-                            imports: getImports(project),
                             ActiveConfiguration: projectInfo.ActiveConfiguration,
                             MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
                             ProjectFileName: projectInfo.ProjectFileName,

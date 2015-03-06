@@ -26,7 +26,6 @@ module csproj2ts {
     export interface VSProjectDetails extends VSProjectParams {
         DefaultProjectConfiguration?: string;
         DefaultVisualStudioVersion?: string;
-        imports: VSImportElement[];
         TypeScriptDefaultPropsFilePath: string;
         NormalizedTypeScriptDefaultPropsFilePath: string;
         TypeScriptDefaultConfiguration: TypeScriptConfiguration;
@@ -120,7 +119,6 @@ module csproj2ts {
                             DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
                             TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
                             NormalizedTypeScriptDefaultPropsFilePath: "",
-                            imports: getImports(project),
                             ActiveConfiguration: projectInfo.ActiveConfiguration,
                             MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
                             ProjectFileName: projectInfo.ProjectFileName,

@@ -46,21 +46,6 @@ export var testGroup: nodeunit.ITestGroup = {
         });
 
     },
-    find_import_items: (test: nodeunit.Test) => {
-        test.expect(1);
-        var vsProjInfo = {
-            ProjectFileName: "tests/artifacts/example1.csproj"
-        }
-
-        csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
-            test.equal(settings.VSProjectDetails.imports.length, 4, "Expected 4 imports items.");
-            test.done();
-        }).catch((error) => {
-            test.ok(false, "Should not be any errors.");
-            test.done();
-        });
-
-    },
     find_TypeScript_default_props_file: (test: nodeunit.Test) => {
         test.expect(1);
         var vsProjInfo = {
