@@ -1,6 +1,6 @@
 ﻿# csproj2ts
 
-Queries a Visual Studio project file (.csproj or .vbproj) for TypeScript configuration information.  Will also find default config in a `Microsoft.TypeScript.Default.props` file, if referenced.
+Queries a Visual Studio project file (.csproj or .vbproj) for TypeScript configuration information.  Will also find default config in a `Microsoft.TypeScript.Default.props` file, if referenced by the project.
 
 Tested with project configuration settings in TypeScript 1.4.
 
