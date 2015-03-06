@@ -64,6 +64,7 @@
     <TypeScriptCompile Include="typings\xml2js\xml2js.d.ts" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="demo.js" />
     <Content Include="gruntfile.js" />
   </ItemGroup>
   <ItemGroup>
@@ -71,6 +72,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="tsd.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="README.md" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptModuleKind>commonjs</TypeScriptModuleKind>
