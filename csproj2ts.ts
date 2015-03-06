@@ -6,7 +6,7 @@ import _PromiseLibrary = require('es6-promise');
 var Promise = _PromiseLibrary.Promise;
 
 module csproj2ts {
-    interface TypeScriptSettings {
+    interface TypeScriptSettings extends TypeScriptConfiguration {
         VSProjectDetails: VSProjectDetails;
         files: string[];
     }
@@ -58,6 +58,32 @@ module csproj2ts {
         Target: string;
     }
 
+    // Thanks: "timo" http://stackoverflow.com/questions/263965/how-can-i-convert-a-string-to-boolean-in-javascript/28152765#28152765
+    var str2bool = (strvalue: any) => {
+        return (typeof strvalue == 'string' && strvalue) ? (strvalue.toLowerCase() == 'true') : (strvalue == true);
+    }
+
+    var getTSSetting = <T>(project: any, abbreviatedSettingName: string, projectConfiguration: string, defaultValue: T): T => {
+        var typeOfGrouping = "PropertyGroup";
+        if (project[typeOfGrouping]) {
+            var items = toArray(project[typeOfGrouping]);
+            _.map(items,(item) => {
+                if (item["$"] && item["$"]["Condition"]) {
+                    var condition = item["$"]["Condition"];
+                    condition = condition.replace(/ /g, "");
+                    if (condition === "'$(Configuration)'=='" + projectConfiguration + "'") {
+                        //console.log(item);
+                        if (item["TypeScript" + abbreviatedSettingName]) {
+                            //console.log("Returning " + item["TypeScript" + abbreviatedSettingName][0]);
+                            return item["TypeScript" + abbreviatedSettingName][0];
+                        }
+                    }
+                }
+            });
+        }
+        return defaultValue;
+    }
+
     export var xml2jsReadXMLFile = (fileName: string) : Promise<any> => {
         return new Promise((resolve, reject) => {
             var parser = new xml2js.Parser();
@@ -87,9 +113,11 @@ module csproj2ts {
                     reject(new Error("No result from parsing the project."));
                 } else {
                     var project = parsedVSProject.Project;
+                    var projectDefaultConfig = getDefaultConfiguration(project);
+                    var projectActiveConfig = projectInfo.ActiveConfiguration || projectDefaultConfig;
                     var result: TypeScriptSettings = {
                         VSProjectDetails: {
-                            DefaultProjectConfiguration: getDefaultConfiguration(project),
+                            DefaultProjectConfiguration: projectDefaultConfig,
                             DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
                             TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
                             NormalizedTypeScriptDefaultPropsFilePath: "",
@@ -100,12 +128,53 @@ module csproj2ts {
                             VisualStudioVersion: projectInfo.VisualStudioVersion,
                             TypeScriptDefaultConfiguration: null
                         },
-                        files: getTypeScriptFilesToCompile(project)
+                        files: getTypeScriptFilesToCompile(project),
+                        AdditionalFlags: undefined,
+                        Charset: undefined,
+                        CodePage: undefined,
+                        CompileOnSaveEnabled: undefined,
+                        EmitBOM: undefined,
+                        GeneratesDeclarations: undefined,
+                        MapRoot: undefined,
+                        ModuleKind: undefined,
+                        NoEmitOnError: undefined,
+                        NoImplicitAny: undefined,
+                        NoLib: undefined,
+                        NoResolve: undefined,
+                        OutDir: undefined,
+                        OutFile: undefined,
+                        PreserveConstEnums: undefined,
+                        RemoveComments: null,
+                        SourceMap: undefined,
+                        SourceRoot: undefined,
+                        SuppressImplicitAnyIndexErrors: undefined,
+                        Target: undefined
                     };
 
-                    normalizePaths(result);
+                    console.log("A\n");
+                    console.log(result);
+                    console.log("B\n");
+                    console.log(result.RemoveComments);
 
-                    resolve(result);
+                    result.RemoveComments = getTSSetting(project, "RemoveComments", projectActiveConfig, undefined);
+
+                    console.log(result.RemoveComments);
+
+                    normalizePaths(result);
+                    
+                    getTypeScriptDefaultsFromPropsFile(result.VSProjectDetails.NormalizedTypeScriptDefaultPropsFilePath)
+                        .then((typeScriptDefaults) => {
+                        result.VSProjectDetails.TypeScriptDefaultConfiguration = typeScriptDefaults;
+
+                        console.log("PAC:" + projectActiveConfig);
+                        console.log("props:" + result.RemoveComments);
+                        console.log("Defs: " + typeScriptDefaults.RemoveComments);
+
+                        result.RemoveComments = result.RemoveComments || typeScriptDefaults.RemoveComments;
+                        
+                        resolve(result);
+                    });
+                    
                 }
             },(error) => {
                     reject(error);
@@ -216,12 +285,7 @@ module csproj2ts {
         }
         return result;
     };
-
-    // Thanks: "timo" http://stackoverflow.com/questions/263965/how-can-i-convert-a-string-to-boolean-in-javascript/28152765#28152765
-    function str2bool(strvalue: any) {
-        return (typeof strvalue == 'string' && strvalue) ? (strvalue.toLowerCase() == 'true') : (strvalue == true);
-    }
-
+    
     function getFirstValueOrDefault<T>(item: any[], defaultValue: T): T {
         if (item && _.isArray(item) && item.length > 0 && !_.isNull(item[0]) && !_.isUndefined(item[0])) {
             if (typeof defaultValue === "boolean") {
@@ -231,6 +295,7 @@ module csproj2ts {
         }
         return defaultValue;
     }
+ 
 
     export var getTypeScriptDefaultsFromPropsFile =
         (propsFileName: string): Promise<TypeScriptConfiguration> => {

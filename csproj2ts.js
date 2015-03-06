@@ -6,6 +6,29 @@ var _PromiseLibrary = require('es6-promise');
 var Promise = _PromiseLibrary.Promise;
 var csproj2ts;
 (function (csproj2ts) {
+    var str2bool = function (strvalue) {
+        return (typeof strvalue == 'string' && strvalue) ? (strvalue.toLowerCase() == 'true') : (strvalue == true);
+    };
+    var getTSSetting = function (project, abbreviatedSettingName, projectConfiguration, defaultValue) {
+        var typeOfGrouping = "PropertyGroup";
+        if (project[typeOfGrouping]) {
+            var items = toArray(project[typeOfGrouping]);
+            _.map(items, function (item) {
+                if (item["$"] && item["$"]["Condition"]) {
+                    var condition = item["$"]["Condition"];
+                    condition = condition.replace(/ /g, "");
+                    if (condition === "'$(Configuration)'=='" + projectConfiguration + "'") {
+                        console.log(item);
+                        if (item["TypeScript" + abbreviatedSettingName]) {
+                            console.log("Returning " + item["TypeScript" + abbreviatedSettingName][0]);
+                            return item["TypeScript" + abbreviatedSettingName][0];
+                        }
+                    }
+                }
+            });
+        }
+        return defaultValue;
+    };
     csproj2ts.xml2jsReadXMLFile = function (fileName) {
         return new Promise(function (resolve, reject) {
             var parser = new xml2js.Parser();
@@ -33,9 +56,11 @@ var csproj2ts;
                 }
                 else {
                     var project = parsedVSProject.Project;
+                    var projectDefaultConfig = getDefaultConfiguration(project);
+                    var projectActiveConfig = projectInfo.ActiveConfiguration || projectDefaultConfig;
                     var result = {
                         VSProjectDetails: {
-                            DefaultProjectConfiguration: getDefaultConfiguration(project),
+                            DefaultProjectConfiguration: projectDefaultConfig,
                             DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
                             TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
                             NormalizedTypeScriptDefaultPropsFilePath: "",
@@ -46,10 +71,43 @@ var csproj2ts;
                             VisualStudioVersion: projectInfo.VisualStudioVersion,
                             TypeScriptDefaultConfiguration: null
                         },
-                        files: getTypeScriptFilesToCompile(project)
+                        files: getTypeScriptFilesToCompile(project),
+                        AdditionalFlags: undefined,
+                        Charset: undefined,
+                        CodePage: undefined,
+                        CompileOnSaveEnabled: undefined,
+                        EmitBOM: undefined,
+                        GeneratesDeclarations: undefined,
+                        MapRoot: undefined,
+                        ModuleKind: undefined,
+                        NoEmitOnError: undefined,
+                        NoImplicitAny: undefined,
+                        NoLib: undefined,
+                        NoResolve: undefined,
+                        OutDir: undefined,
+                        OutFile: undefined,
+                        PreserveConstEnums: undefined,
+                        RemoveComments: null,
+                        SourceMap: undefined,
+                        SourceRoot: undefined,
+                        SuppressImplicitAnyIndexErrors: undefined,
+                        Target: undefined
                     };
+                    console.log("A\n");
+                    console.log(result);
+                    console.log("B\n");
+                    console.log(result.RemoveComments);
+                    result.RemoveComments = getTSSetting(project, "RemoveComments", projectActiveConfig, undefined);
+                    console.log(result.RemoveComments);
                     normalizePaths(result);
-                    resolve(result);
+                    csproj2ts.getTypeScriptDefaultsFromPropsFile(result.VSProjectDetails.NormalizedTypeScriptDefaultPropsFilePath).then(function (typeScriptDefaults) {
+                        result.VSProjectDetails.TypeScriptDefaultConfiguration = typeScriptDefaults;
+                        console.log("PAC:" + projectActiveConfig);
+                        console.log("props:" + result.RemoveComments);
+                        console.log("Defs: " + typeScriptDefaults.RemoveComments);
+                        result.RemoveComments = result.RemoveComments || typeScriptDefaults.RemoveComments;
+                        resolve(result);
+                    });
                 }
             }, function (error) {
                 reject(error);
@@ -145,9 +203,6 @@ var csproj2ts;
         }
         return result;
     };
-    function str2bool(strvalue) {
-        return (typeof strvalue == 'string' && strvalue) ? (strvalue.toLowerCase() == 'true') : (strvalue == true);
-    }
     function getFirstValueOrDefault(item, defaultValue) {
         if (item && _.isArray(item) && item.length > 0 && !_.isNull(item[0]) && !_.isUndefined(item[0])) {
             if (typeof defaultValue === "boolean") {
