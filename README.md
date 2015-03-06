@@ -6,6 +6,8 @@ Tested with project configuration settings in TypeScript 1.4.
 
 Run `node demo.js` for a working example (assumes `csproj2ts.csproj` in current folder).
 
+This module only *collects* the information.  What you do with it after is up to you.
+
 ## Example Usage:
 ```javascript
 
