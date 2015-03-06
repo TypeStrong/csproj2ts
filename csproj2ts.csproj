@@ -44,10 +44,12 @@
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <TypeScriptSuppressImplicitAnyIndexErrors>true</TypeScriptSuppressImplicitAnyIndexErrors>
     <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
     <TypeScriptSourceMap>False</TypeScriptSourceMap>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <TypeScriptSuppressImplicitAnyIndexErrors>true</TypeScriptSuppressImplicitAnyIndexErrors>
     <TypeScriptRemoveComments>true</TypeScriptRemoveComments>
     <TypeScriptSourceMap>false</TypeScriptSourceMap>
   </PropertyGroup>

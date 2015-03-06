@@ -6,11 +6,12 @@ var _PromiseLibrary = require('es6-promise');
 var Promise = _PromiseLibrary.Promise;
 var csproj2ts;
 (function (csproj2ts) {
-    var str2bool = function (strvalue) {
-        return (typeof strvalue == 'string' && strvalue) ? (strvalue.toLowerCase() == 'true') : (strvalue == true);
+    var cboolean = function (value) {
+        return (typeof value === 'string') ? (value.toLowerCase() === 'true') : value;
     };
     var getTSSetting = function (project, abbreviatedSettingName, projectConfiguration, defaultValue) {
         var typeOfGrouping = "PropertyGroup";
+        var result = defaultValue;
         if (project[typeOfGrouping]) {
             var items = toArray(project[typeOfGrouping]);
             _.map(items, function (item) {
@@ -18,16 +19,14 @@ var csproj2ts;
                     var condition = item["$"]["Condition"];
                     condition = condition.replace(/ /g, "");
                     if (condition === "'$(Configuration)'=='" + projectConfiguration + "'") {
-                        console.log(item);
                         if (item["TypeScript" + abbreviatedSettingName]) {
-                            console.log("Returning " + item["TypeScript" + abbreviatedSettingName][0]);
-                            return item["TypeScript" + abbreviatedSettingName][0];
+                            result = item["TypeScript" + abbreviatedSettingName][0];
                         }
                     }
                 }
             });
         }
-        return defaultValue;
+        return result;
     };
     csproj2ts.xml2jsReadXMLFile = function (fileName) {
         return new Promise(function (resolve, reject) {
@@ -72,40 +71,35 @@ var csproj2ts;
                             TypeScriptDefaultConfiguration: null
                         },
                         files: getTypeScriptFilesToCompile(project),
-                        AdditionalFlags: undefined,
-                        Charset: undefined,
-                        CodePage: undefined,
-                        CompileOnSaveEnabled: undefined,
-                        EmitBOM: undefined,
-                        GeneratesDeclarations: undefined,
-                        MapRoot: undefined,
-                        ModuleKind: undefined,
-                        NoEmitOnError: undefined,
-                        NoImplicitAny: undefined,
-                        NoLib: undefined,
-                        NoResolve: undefined,
-                        OutDir: undefined,
-                        OutFile: undefined,
-                        PreserveConstEnums: undefined,
-                        RemoveComments: null,
-                        SourceMap: undefined,
-                        SourceRoot: undefined,
-                        SuppressImplicitAnyIndexErrors: undefined,
-                        Target: undefined
+                        AdditionalFlags: getTSSetting(project, "AdditionalFlags", projectActiveConfig, undefined),
+                        Charset: getTSSetting(project, "Charset", projectActiveConfig, undefined),
+                        CodePage: getTSSetting(project, "CodePage", projectActiveConfig, undefined),
+                        CompileOnSaveEnabled: cboolean(getTSSetting(project, "CompileOnSaveEnabled", projectActiveConfig, undefined)),
+                        EmitBOM: cboolean(getTSSetting(project, "EmitBOM", projectActiveConfig, undefined)),
+                        GeneratesDeclarations: cboolean(getTSSetting(project, "GeneratesDeclarations", projectActiveConfig, undefined)),
+                        MapRoot: getTSSetting(project, "MapRoot", projectActiveConfig, undefined),
+                        ModuleKind: getTSSetting(project, "ModuleKind", projectActiveConfig, undefined),
+                        NoEmitOnError: cboolean(getTSSetting(project, "NoEmitOnError", projectActiveConfig, undefined)),
+                        NoImplicitAny: cboolean(getTSSetting(project, "NoImplicitAny", projectActiveConfig, undefined)),
+                        NoLib: cboolean(getTSSetting(project, "NoLib", projectActiveConfig, undefined)),
+                        NoResolve: cboolean(getTSSetting(project, "NoResolve", projectActiveConfig, undefined)),
+                        OutDir: getTSSetting(project, "OutDir", projectActiveConfig, undefined),
+                        OutFile: getTSSetting(project, "OutFile", projectActiveConfig, undefined),
+                        PreserveConstEnums: cboolean(getTSSetting(project, "PreserveConstEnums", projectActiveConfig, undefined)),
+                        RemoveComments: cboolean(getTSSetting(project, "RemoveComments", projectActiveConfig, undefined)),
+                        SourceMap: cboolean(getTSSetting(project, "SourceMap", projectActiveConfig, undefined)),
+                        SourceRoot: getTSSetting(project, "SourceRoot", projectActiveConfig, undefined),
+                        SuppressImplicitAnyIndexErrors: cboolean(getTSSetting(project, "SuppressImplicitAnyIndexErrors", projectActiveConfig, undefined)),
+                        Target: getTSSetting(project, "Target", projectActiveConfig, undefined)
                     };
-                    console.log("A\n");
-                    console.log(result);
-                    console.log("B\n");
-                    console.log(result.RemoveComments);
-                    result.RemoveComments = getTSSetting(project, "RemoveComments", projectActiveConfig, undefined);
-                    console.log(result.RemoveComments);
                     normalizePaths(result);
                     csproj2ts.getTypeScriptDefaultsFromPropsFile(result.VSProjectDetails.NormalizedTypeScriptDefaultPropsFilePath).then(function (typeScriptDefaults) {
                         result.VSProjectDetails.TypeScriptDefaultConfiguration = typeScriptDefaults;
-                        console.log("PAC:" + projectActiveConfig);
-                        console.log("props:" + result.RemoveComments);
-                        console.log("Defs: " + typeScriptDefaults.RemoveComments);
-                        result.RemoveComments = result.RemoveComments || typeScriptDefaults.RemoveComments;
+                        _.forOwn(result, function (value, key) {
+                            if (_.isNull(value) || _.isUndefined(value)) {
+                                result[key] = typeScriptDefaults[key];
+                            }
+                        });
                         resolve(result);
                     });
                 }
@@ -206,7 +200,7 @@ var csproj2ts;
     function getFirstValueOrDefault(item, defaultValue) {
         if (item && _.isArray(item) && item.length > 0 && !_.isNull(item[0]) && !_.isUndefined(item[0])) {
             if (typeof defaultValue === "boolean") {
-                return str2bool(item[0]);
+                return cboolean(item[0]);
             }
             return item[0];
         }

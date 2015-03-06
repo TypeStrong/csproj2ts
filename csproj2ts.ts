@@ -36,35 +36,36 @@ module csproj2ts {
      * url: * https://github.com/Microsoft/TypeScript/issues/1712#issuecomment-70574319
      * */
     export interface TypeScriptConfiguration {
-        AdditionalFlags: string;
-        Charset: string;
-        CodePage: string;
-        CompileOnSaveEnabled: boolean;
-        EmitBOM: boolean;
-        GeneratesDeclarations: boolean;
-        MapRoot: string;
-        ModuleKind: string;
-        NoEmitOnError: boolean;
-        NoImplicitAny: boolean;
-        NoLib: string;
-        NoResolve: string;
-        OutFile: string;
-        OutDir: string;
-        PreserveConstEnums: boolean;
-        RemoveComments: boolean;
-        SourceMap: boolean;
-        SourceRoot: string;
-        SuppressImplicitAnyIndexErrors: string;
-        Target: string;
+        AdditionalFlags?: string;
+        Charset?: string;
+        CodePage?: string;
+        CompileOnSaveEnabled?: boolean;
+        EmitBOM?: boolean;
+        GeneratesDeclarations?: boolean;
+        MapRoot?: string;
+        ModuleKind?: string;
+        NoEmitOnError?: boolean;
+        NoImplicitAny?: boolean;
+        NoLib?: boolean;
+        NoResolve?: boolean;
+        OutFile?: string;
+        OutDir?: string;
+        PreserveConstEnums?: boolean;
+        RemoveComments?: boolean;
+        SourceMap?: boolean;
+        SourceRoot?: string;
+        SuppressImplicitAnyIndexErrors?: boolean;
+        Target?: string;
     }
 
     // Thanks: "timo" http://stackoverflow.com/questions/263965/how-can-i-convert-a-string-to-boolean-in-javascript/28152765#28152765
-    var str2bool = (strvalue: any) => {
-        return (typeof strvalue == 'string' && strvalue) ? (strvalue.toLowerCase() == 'true') : (strvalue == true);
+    var cboolean = (value: string | boolean) => {
+        return (typeof value === 'string') ? (value.toLowerCase() === 'true') : value;
     }
 
     var getTSSetting = <T>(project: any, abbreviatedSettingName: string, projectConfiguration: string, defaultValue: T): T => {
         var typeOfGrouping = "PropertyGroup";
+        var result = defaultValue;
         if (project[typeOfGrouping]) {
             var items = toArray(project[typeOfGrouping]);
             _.map(items,(item) => {
@@ -72,16 +73,14 @@ module csproj2ts {
                     var condition = item["$"]["Condition"];
                     condition = condition.replace(/ /g, "");
                     if (condition === "'$(Configuration)'=='" + projectConfiguration + "'") {
-                        //console.log(item);
                         if (item["TypeScript" + abbreviatedSettingName]) {
-                            //console.log("Returning " + item["TypeScript" + abbreviatedSettingName][0]);
-                            return item["TypeScript" + abbreviatedSettingName][0];
+                            result = item["TypeScript" + abbreviatedSettingName][0];
                         }
                     }
                 }
             });
         }
-        return defaultValue;
+        return result;
     }
 
     export var xml2jsReadXMLFile = (fileName: string) : Promise<any> => {
@@ -129,48 +128,40 @@ module csproj2ts {
                             TypeScriptDefaultConfiguration: null
                         },
                         files: getTypeScriptFilesToCompile(project),
-                        AdditionalFlags: undefined,
-                        Charset: undefined,
-                        CodePage: undefined,
-                        CompileOnSaveEnabled: undefined,
-                        EmitBOM: undefined,
-                        GeneratesDeclarations: undefined,
-                        MapRoot: undefined,
-                        ModuleKind: undefined,
-                        NoEmitOnError: undefined,
-                        NoImplicitAny: undefined,
-                        NoLib: undefined,
-                        NoResolve: undefined,
-                        OutDir: undefined,
-                        OutFile: undefined,
-                        PreserveConstEnums: undefined,
-                        RemoveComments: null,
-                        SourceMap: undefined,
-                        SourceRoot: undefined,
-                        SuppressImplicitAnyIndexErrors: undefined,
-                        Target: undefined
+                        AdditionalFlags: getTSSetting(project, "AdditionalFlags", projectActiveConfig, undefined),
+                        Charset: getTSSetting(project, "Charset", projectActiveConfig, undefined),
+                        CodePage: getTSSetting(project, "CodePage", projectActiveConfig, undefined),
+                        CompileOnSaveEnabled: cboolean(getTSSetting(project, "CompileOnSaveEnabled", projectActiveConfig, undefined)),
+                        EmitBOM: cboolean(getTSSetting(project, "EmitBOM", projectActiveConfig, undefined)),
+                        GeneratesDeclarations: cboolean(getTSSetting(project, "GeneratesDeclarations", projectActiveConfig, undefined)),
+                        MapRoot: getTSSetting(project, "MapRoot", projectActiveConfig, undefined),
+                        ModuleKind: getTSSetting(project, "ModuleKind", projectActiveConfig, undefined),
+                        NoEmitOnError: cboolean(getTSSetting(project, "NoEmitOnError", projectActiveConfig, undefined)),
+                        NoImplicitAny: cboolean(getTSSetting(project, "NoImplicitAny", projectActiveConfig, undefined)),
+                        NoLib: cboolean(getTSSetting(project, "NoLib", projectActiveConfig, undefined)),
+                        NoResolve: cboolean(getTSSetting(project, "NoResolve", projectActiveConfig, undefined)),
+                        OutDir: getTSSetting(project, "OutDir", projectActiveConfig, undefined),
+                        OutFile: getTSSetting(project, "OutFile", projectActiveConfig, undefined),
+                        PreserveConstEnums: cboolean(getTSSetting(project, "PreserveConstEnums", projectActiveConfig, undefined)),
+                        RemoveComments: cboolean(getTSSetting(project, "RemoveComments", projectActiveConfig, undefined)),
+                        SourceMap: cboolean(getTSSetting(project, "SourceMap", projectActiveConfig, undefined)),
+                        SourceRoot: getTSSetting(project, "SourceRoot", projectActiveConfig, undefined),
+                        SuppressImplicitAnyIndexErrors: cboolean(getTSSetting(project, "SuppressImplicitAnyIndexErrors", projectActiveConfig, undefined)),
+                        Target: getTSSetting(project, "Target", projectActiveConfig, undefined)
                     };
-
-                    console.log("A\n");
-                    console.log(result);
-                    console.log("B\n");
-                    console.log(result.RemoveComments);
-
-                    result.RemoveComments = getTSSetting(project, "RemoveComments", projectActiveConfig, undefined);
-
-                    console.log(result.RemoveComments);
 
                     normalizePaths(result);
                     
                     getTypeScriptDefaultsFromPropsFile(result.VSProjectDetails.NormalizedTypeScriptDefaultPropsFilePath)
                         .then((typeScriptDefaults) => {
+
                         result.VSProjectDetails.TypeScriptDefaultConfiguration = typeScriptDefaults;
-
-                        console.log("PAC:" + projectActiveConfig);
-                        console.log("props:" + result.RemoveComments);
-                        console.log("Defs: " + typeScriptDefaults.RemoveComments);
-
-                        result.RemoveComments = result.RemoveComments || typeScriptDefaults.RemoveComments;
+                        
+                        _.forOwn(result,(value, key) => {
+                            if (_.isNull(value) || _.isUndefined(value)) {
+                                result[key] = typeScriptDefaults[key];
+                            }
+                        });
                         
                         resolve(result);
                     });
@@ -178,8 +169,8 @@ module csproj2ts {
                 }
             },(error) => {
                     reject(error);
-                });
             });
+        });
     }
 
     var normalizePaths = (settings: TypeScriptSettings) => {
@@ -289,7 +280,7 @@ module csproj2ts {
     function getFirstValueOrDefault<T>(item: any[], defaultValue: T): T {
         if (item && _.isArray(item) && item.length > 0 && !_.isNull(item[0]) && !_.isUndefined(item[0])) {
             if (typeof defaultValue === "boolean") {
-                return <T><any>str2bool(item[0]);  //todo: is the requirement to cast here a bug?
+                return <T><any>cboolean(item[0]);  //todo: is the requirement to cast here a bug?
             }
             return item[0];
         }
