@@ -46,6 +46,29 @@ export var testGroup: nodeunit.ITestGroup = {
         });
 
     },
+    use_TypeScript_fallback_configuration_if_referenced_props_file_not_found: (test: nodeunit.Test) => {
+        test.expect(2);
+        var vsProjInfo = {
+            ProjectFileName: "tests/artifacts/props_does_not_exist.csproj",
+            ActiveConfiguration: "Release",
+            TypeScriptVersion: "1.3"
+        }
+
+        csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
+            test.equal(settings.NoEmitOnError, false, "expected TypeScript 1.3 default to emit on error");
+            vsProjInfo.TypeScriptVersion = "1.4";
+
+            return csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
+                test.equal(settings.NoEmitOnError, true, "expected TypeScript 1.4 default to not emit on error");
+                test.done();
+            });
+
+        }).catch((error) => {
+            test.ok(false, "Should not be any errors.");
+            test.done();
+        });
+
+    },
     find_TypeScript_default_props_file: (test: nodeunit.Test) => {
         test.expect(1);
         var vsProjInfo = {
@@ -53,7 +76,7 @@ export var testGroup: nodeunit.ITestGroup = {
         }
 
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
-            test.equal(settings.VSProjectDetails.NormalizedTypeScriptDefaultPropsFilePath,
+            test.equal(csproj2ts.normalizePath(settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, settings),
                 programFiles + "\\MSBuild\\\\Microsoft\\VisualStudio\\v12.0\\TypeScript\\Microsoft.TypeScript.Default.props",
                 "Expected to see appropriate .props file name.");
             test.done();
@@ -80,7 +103,13 @@ export var testGroup: nodeunit.ITestGroup = {
     fetch_default_properties_properly: (test: nodeunit.Test) => {
         test.expect(18);
 
-        csproj2ts.getTypeScriptDefaultsFromPropsFile("tests/artifacts/Microsoft.TypeScript.Default.props")
+        var settings : csproj2ts.TypeScriptSettings = {
+          VSProjectDetails: {
+            TypeScriptDefaultPropsFilePath: "tests/artifacts/Microsoft.TypeScript.Default.props"
+          }
+        };
+
+        csproj2ts.getTypeScriptDefaultsFromPropsFileOrDefaults(settings)
             .then((result) => {
 
             test.equal(result.AdditionalFlags, undefined);

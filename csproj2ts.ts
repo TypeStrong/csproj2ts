@@ -6,9 +6,9 @@ import _PromiseLibrary = require('es6-promise');
 var Promise = _PromiseLibrary.Promise;
 
 module csproj2ts {
-    interface TypeScriptSettings extends TypeScriptConfiguration {
-        VSProjectDetails: VSProjectDetails;
-        files: string[];
+    export interface TypeScriptSettings extends TypeScriptConfiguration {
+        VSProjectDetails?: VSProjectDetails;
+        files?: string[];
     }
 
     interface VSImportElement {
@@ -17,18 +17,18 @@ module csproj2ts {
     }
 
     export interface VSProjectParams {
-        ProjectFileName: string;
+        ProjectFileName?: string;
         MSBuildExtensionsPath32?: string;
         VisualStudioVersion?: string;
+        TypeScriptVersion?: string;
         ActiveConfiguration?: string;
     }
 
     export interface VSProjectDetails extends VSProjectParams {
         DefaultProjectConfiguration?: string;
         DefaultVisualStudioVersion?: string;
-        TypeScriptDefaultPropsFilePath: string;
-        NormalizedTypeScriptDefaultPropsFilePath: string;
-        TypeScriptDefaultConfiguration: TypeScriptConfiguration;
+        TypeScriptDefaultPropsFilePath?: string;
+        TypeScriptDefaultConfiguration?: TypeScriptConfiguration;
     }
 
     /** Configuration tags used by Visual Studio TypeScript Project Properties/MSBuild.
@@ -118,12 +118,11 @@ module csproj2ts {
                             DefaultProjectConfiguration: projectDefaultConfig,
                             DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
                             TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
-                            NormalizedTypeScriptDefaultPropsFilePath: "",
                             ActiveConfiguration: projectInfo.ActiveConfiguration,
                             MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
                             ProjectFileName: projectInfo.ProjectFileName,
                             VisualStudioVersion: projectInfo.VisualStudioVersion,
-                            TypeScriptDefaultConfiguration: null
+                            TypeScriptVersion: projectInfo.TypeScriptVersion
                         },
                         files: getTypeScriptFilesToCompile(project),
                         AdditionalFlags: getTSSetting(project, "AdditionalFlags", projectActiveConfig, undefined),
@@ -148,36 +147,36 @@ module csproj2ts {
                         Target: getTSSetting(project, "Target", projectActiveConfig, undefined)
                     };
 
-                    normalizePaths(result);
-                    
-                    getTypeScriptDefaultsFromPropsFile(result.VSProjectDetails.NormalizedTypeScriptDefaultPropsFilePath)
+                    getTypeScriptDefaultsFromPropsFileOrDefaults(result)
                         .then((typeScriptDefaults) => {
 
                         result.VSProjectDetails.TypeScriptDefaultConfiguration = typeScriptDefaults;
-                        
-                        _.forOwn(result,(value, key) => {
-                            if (_.isNull(value) || _.isUndefined(value)) {
-                                result[key] = typeScriptDefaults[key];
-                            }
-                        });
-                        
-                        resolve(result);
+                        finishUp(typeScriptDefaults);
+
+                    }).catch((error) => {
+                        var fallbackDefaults = VSTypeScriptDefaults(result.VSProjectDetails.TypeScriptVersion);
+                        result.VSProjectDetails.TypeScriptDefaultConfiguration = fallbackDefaults;
+                        finishUp(fallbackDefaults);
                     });
-                    
+
+                    var finishUp = (defaults :TypeScriptConfiguration ) => {
+                      _.forOwn(result,(value, key) => {
+                          if (_.isNull(value) || _.isUndefined(value)) {
+                              result[key] = defaults[key];
+                          }
+                      });
+                      resolve(result);
+                    };
+
                 }
-            },(error) => {
-                    reject(error);
+            },(error : NodeJS.ErrnoException) => {
+                //Error parsing project file.
+                reject(error);
             });
         });
     }
 
-    var normalizePaths = (settings: TypeScriptSettings) => {
-        settings.VSProjectDetails.NormalizedTypeScriptDefaultPropsFilePath = normalizePath(
-            settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, settings
-            );
-    };
-
-    var normalizePath = (path: string, settings: TypeScriptSettings): string => {
+    export var normalizePath = (path: string, settings: TypeScriptSettings): string => {
         if (path.indexOf("$(VisualStudioVersion)") > -1) {
             path = path.replace(/\$\(VisualStudioVersion\)/g,
                 settings.VSProjectDetails.VisualStudioVersion || settings.VSProjectDetails.DefaultVisualStudioVersion
@@ -209,7 +208,7 @@ module csproj2ts {
                 if (item["$"]) {
                     result.push(item["$"]);
                 }
-            })
+            });
         }
         return result;
     };
@@ -274,7 +273,7 @@ module csproj2ts {
         }
         return result;
     };
-    
+
     function getFirstValueOrDefault<T>(item: any[], defaultValue: T): T {
         if (item && _.isArray(item) && item.length > 0 && !_.isNull(item[0]) && !_.isUndefined(item[0])) {
             if (typeof defaultValue === "boolean") {
@@ -284,37 +283,97 @@ module csproj2ts {
         }
         return defaultValue;
     }
- 
 
-    export var getTypeScriptDefaultsFromPropsFile =
-        (propsFileName: string): Promise<TypeScriptConfiguration> => {
+    var findPropsFileName = (settings: TypeScriptSettings): Promise<string> => {
+      return new Promise((resolve, reject) => {
+
+        var propsFileName = normalizePath(settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, settings);
+
+        if (fs.existsSync(propsFileName)){
+          resolve(propsFileName);
+          return;
+        }
+
+        var alternateSettings = _.cloneDeep(settings);
+
+        for (var i = 20; i >= 10; i-=1) {
+
+          alternateSettings.VSProjectDetails.VisualStudioVersion = i.toString() + ".0";
+          propsFileName = normalizePath(settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, alternateSettings);
+          if (fs.existsSync(propsFileName)){
+            resolve(propsFileName);
+            return;
+          }
+        }
+
+        reject(new Error("Could not find a valid props file."));
+
+      });
+    }
+
+
+    export var getTypeScriptDefaultsFromPropsFileOrDefaults =
+        (settings: TypeScriptSettings): Promise<TypeScriptConfiguration> => {
 
             return new Promise((resolve, reject) => {
+              findPropsFileName(settings).then((propsFileName) => {
                 xml2jsReadXMLFile(propsFileName).then((parsedPropertiesFile) => {
                     if (!parsedPropertiesFile || !parsedPropertiesFile.Project || !parsedPropertiesFile.Project.PropertyGroup) {
                         reject(new Error("No result from parsing the project."));
                     } else {
                         var pg = toArray(parsedPropertiesFile.Project.PropertyGroup)[0];
-                        var result: TypeScriptConfiguration = <any>{};
+                        var result: TypeScriptConfiguration = {};
 
-                        result.Target = getFirstValueOrDefault(pg.TypeScriptTarget, "ES3");
-                        result.CompileOnSaveEnabled = getFirstValueOrDefault(pg.TypeScriptCompileOnSaveEnabled, false);
-                        result.NoImplicitAny = getFirstValueOrDefault(pg.TypeScriptNoImplicitAny, false);
-                        result.ModuleKind = getFirstValueOrDefault(pg.TypeScriptModuleKind, "");
-                        result.RemoveComments = getFirstValueOrDefault(pg.TypeScriptRemoveComments, false);
-                        result.OutFile = getFirstValueOrDefault(pg.TypeScriptOutFile, "");
-                        result.OutDir = getFirstValueOrDefault(pg.TypeScriptOutDir, "");
-                        result.GeneratesDeclarations = getFirstValueOrDefault(pg.TypeScriptGeneratesDeclarations, false);
-                        result.SourceMap = getFirstValueOrDefault(pg.TypeScriptSourceMap, false);
-                        result.MapRoot = getFirstValueOrDefault(pg.TypeScript, "");
-                        result.SourceRoot = getFirstValueOrDefault(pg.TypeScriptSourceRoot, "");
-                        result.NoEmitOnError = getFirstValueOrDefault(pg.TypeScript, true);
+                        var def = VSTypeScriptDefaults(settings.VSProjectDetails.TypeScriptVersion);
+
+
+                        result.Target = getFirstValueOrDefault(pg.TypeScriptTarget, def.Target);
+                        result.CompileOnSaveEnabled = getFirstValueOrDefault(pg.TypeScriptCompileOnSaveEnabled, def.CompileOnSaveEnabled);
+                        result.NoImplicitAny = getFirstValueOrDefault(pg.TypeScriptNoImplicitAny, def.NoImplicitAny);
+                        result.ModuleKind = getFirstValueOrDefault(pg.TypeScriptModuleKind, def.ModuleKind);
+                        result.RemoveComments = getFirstValueOrDefault(pg.TypeScriptRemoveComments, def.RemoveComments);
+                        result.OutFile = getFirstValueOrDefault(pg.TypeScriptOutFile, def.OutFile);
+                        result.OutDir = getFirstValueOrDefault(pg.TypeScriptOutDir, def.OutDir);
+                        result.GeneratesDeclarations = getFirstValueOrDefault(pg.TypeScriptGeneratesDeclarations, def.GeneratesDeclarations);
+                        result.SourceMap = getFirstValueOrDefault(pg.TypeScriptSourceMap, def.SourceMap);
+                        result.MapRoot = getFirstValueOrDefault(pg.TypeScript, def.MapRoot);
+                        result.SourceRoot = getFirstValueOrDefault(pg.TypeScriptSourceRoot, def.SourceRoot);
+                        result.NoEmitOnError = getFirstValueOrDefault(pg.TypeScript, def.NoEmitOnError);
 
                         resolve(result);
-                    }
-                },(error) => { reject(error); });
-            });
-        };
+                      }
+                    },(error) => { /* failed to parse the project */ reject(error); });
+                },(error) => {
+                  /* failed to parse the props file name */
+                  reject(error);
+                });
+        });
+    };
+
+    var VSTypeScriptDefaults = (version?: string) => {
+
+      if (!version) {
+        version = "1.4";
+      }
+
+      var dev: TypeScriptConfiguration = {
+        Target : "ES3",
+        CompileOnSaveEnabled : false,
+        NoImplicitAny : false,
+        ModuleKind : "",
+        RemoveComments : false,
+        OutFile : "",
+        OutDir : "",
+        GeneratesDeclarations : false,
+        SourceMap : false,
+        MapRoot : "",
+        SourceRoot : "",
+        NoEmitOnError : (version === "1.4")
+      };
+
+      return dev;
+
+    }
 
     export var programFiles = (): string => {
         return process.env["ProgramFiles(x86)"] || process.env["ProgramFiles"] || "";

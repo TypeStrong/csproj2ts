@@ -62,12 +62,11 @@ var csproj2ts;
                             DefaultProjectConfiguration: projectDefaultConfig,
                             DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
                             TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
-                            NormalizedTypeScriptDefaultPropsFilePath: "",
                             ActiveConfiguration: projectInfo.ActiveConfiguration,
                             MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
                             ProjectFileName: projectInfo.ProjectFileName,
                             VisualStudioVersion: projectInfo.VisualStudioVersion,
-                            TypeScriptDefaultConfiguration: null
+                            TypeScriptVersion: projectInfo.TypeScriptVersion
                         },
                         files: getTypeScriptFilesToCompile(project),
                         AdditionalFlags: getTSSetting(project, "AdditionalFlags", projectActiveConfig, undefined),
@@ -91,26 +90,29 @@ var csproj2ts;
                         SuppressImplicitAnyIndexErrors: cboolean(getTSSetting(project, "SuppressImplicitAnyIndexErrors", projectActiveConfig, undefined)),
                         Target: getTSSetting(project, "Target", projectActiveConfig, undefined)
                     };
-                    normalizePaths(result);
-                    csproj2ts.getTypeScriptDefaultsFromPropsFile(result.VSProjectDetails.NormalizedTypeScriptDefaultPropsFilePath).then(function (typeScriptDefaults) {
+                    csproj2ts.getTypeScriptDefaultsFromPropsFileOrDefaults(result).then(function (typeScriptDefaults) {
                         result.VSProjectDetails.TypeScriptDefaultConfiguration = typeScriptDefaults;
+                        finishUp(typeScriptDefaults);
+                    }).catch(function (error) {
+                        var fallbackDefaults = VSTypeScriptDefaults(result.VSProjectDetails.TypeScriptVersion);
+                        result.VSProjectDetails.TypeScriptDefaultConfiguration = fallbackDefaults;
+                        finishUp(fallbackDefaults);
+                    });
+                    var finishUp = function (defaults) {
                         _.forOwn(result, function (value, key) {
                             if (_.isNull(value) || _.isUndefined(value)) {
-                                result[key] = typeScriptDefaults[key];
+                                result[key] = defaults[key];
                             }
                         });
                         resolve(result);
-                    });
+                    };
                 }
             }, function (error) {
                 reject(error);
             });
         });
     };
-    var normalizePaths = function (settings) {
-        settings.VSProjectDetails.NormalizedTypeScriptDefaultPropsFilePath = normalizePath(settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, settings);
-    };
-    var normalizePath = function (path, settings) {
+    csproj2ts.normalizePath = function (path, settings) {
         if (path.indexOf("$(VisualStudioVersion)") > -1) {
             path = path.replace(/\$\(VisualStudioVersion\)/g, settings.VSProjectDetails.VisualStudioVersion || settings.VSProjectDetails.DefaultVisualStudioVersion);
         }
@@ -205,33 +207,77 @@ var csproj2ts;
         }
         return defaultValue;
     }
-    csproj2ts.getTypeScriptDefaultsFromPropsFile = function (propsFileName) {
+    var findPropsFileName = function (settings) {
         return new Promise(function (resolve, reject) {
-            csproj2ts.xml2jsReadXMLFile(propsFileName).then(function (parsedPropertiesFile) {
-                if (!parsedPropertiesFile || !parsedPropertiesFile.Project || !parsedPropertiesFile.Project.PropertyGroup) {
-                    reject(new Error("No result from parsing the project."));
+            var propsFileName = csproj2ts.normalizePath(settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, settings);
+            if (fs.existsSync(propsFileName)) {
+                resolve(propsFileName);
+                return;
+            }
+            var alternateSettings = _.cloneDeep(settings);
+            for (var i = 20; i >= 10; i -= 1) {
+                alternateSettings.VSProjectDetails.VisualStudioVersion = i.toString() + ".0";
+                propsFileName = csproj2ts.normalizePath(settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, alternateSettings);
+                if (fs.existsSync(propsFileName)) {
+                    resolve(propsFileName);
+                    return;
                 }
-                else {
-                    var pg = toArray(parsedPropertiesFile.Project.PropertyGroup)[0];
-                    var result = {};
-                    result.Target = getFirstValueOrDefault(pg.TypeScriptTarget, "ES3");
-                    result.CompileOnSaveEnabled = getFirstValueOrDefault(pg.TypeScriptCompileOnSaveEnabled, false);
-                    result.NoImplicitAny = getFirstValueOrDefault(pg.TypeScriptNoImplicitAny, false);
-                    result.ModuleKind = getFirstValueOrDefault(pg.TypeScriptModuleKind, "");
-                    result.RemoveComments = getFirstValueOrDefault(pg.TypeScriptRemoveComments, false);
-                    result.OutFile = getFirstValueOrDefault(pg.TypeScriptOutFile, "");
-                    result.OutDir = getFirstValueOrDefault(pg.TypeScriptOutDir, "");
-                    result.GeneratesDeclarations = getFirstValueOrDefault(pg.TypeScriptGeneratesDeclarations, false);
-                    result.SourceMap = getFirstValueOrDefault(pg.TypeScriptSourceMap, false);
-                    result.MapRoot = getFirstValueOrDefault(pg.TypeScript, "");
-                    result.SourceRoot = getFirstValueOrDefault(pg.TypeScriptSourceRoot, "");
-                    result.NoEmitOnError = getFirstValueOrDefault(pg.TypeScript, true);
-                    resolve(result);
-                }
+            }
+            reject(new Error("Could not find a valid props file."));
+        });
+    };
+    csproj2ts.getTypeScriptDefaultsFromPropsFileOrDefaults = function (settings) {
+        return new Promise(function (resolve, reject) {
+            findPropsFileName(settings).then(function (propsFileName) {
+                csproj2ts.xml2jsReadXMLFile(propsFileName).then(function (parsedPropertiesFile) {
+                    if (!parsedPropertiesFile || !parsedPropertiesFile.Project || !parsedPropertiesFile.Project.PropertyGroup) {
+                        reject(new Error("No result from parsing the project."));
+                    }
+                    else {
+                        var pg = toArray(parsedPropertiesFile.Project.PropertyGroup)[0];
+                        var result = {};
+                        var def = VSTypeScriptDefaults(settings.VSProjectDetails.TypeScriptVersion);
+                        result.Target = getFirstValueOrDefault(pg.TypeScriptTarget, def.Target);
+                        result.CompileOnSaveEnabled = getFirstValueOrDefault(pg.TypeScriptCompileOnSaveEnabled, def.CompileOnSaveEnabled);
+                        result.NoImplicitAny = getFirstValueOrDefault(pg.TypeScriptNoImplicitAny, def.NoImplicitAny);
+                        result.ModuleKind = getFirstValueOrDefault(pg.TypeScriptModuleKind, def.ModuleKind);
+                        result.RemoveComments = getFirstValueOrDefault(pg.TypeScriptRemoveComments, def.RemoveComments);
+                        result.OutFile = getFirstValueOrDefault(pg.TypeScriptOutFile, def.OutFile);
+                        result.OutDir = getFirstValueOrDefault(pg.TypeScriptOutDir, def.OutDir);
+                        result.GeneratesDeclarations = getFirstValueOrDefault(pg.TypeScriptGeneratesDeclarations, def.GeneratesDeclarations);
+                        result.SourceMap = getFirstValueOrDefault(pg.TypeScriptSourceMap, def.SourceMap);
+                        result.MapRoot = getFirstValueOrDefault(pg.TypeScript, def.MapRoot);
+                        result.SourceRoot = getFirstValueOrDefault(pg.TypeScriptSourceRoot, def.SourceRoot);
+                        result.NoEmitOnError = getFirstValueOrDefault(pg.TypeScript, def.NoEmitOnError);
+                        resolve(result);
+                    }
+                }, function (error) {
+                    reject(error);
+                });
             }, function (error) {
                 reject(error);
             });
         });
+    };
+    var VSTypeScriptDefaults = function (version) {
+        if (!version) {
+            version = "1.4";
+        }
+        var dev = {
+            Target: "ES3",
+            CompileOnSaveEnabled: false,
+            NoImplicitAny: false,
+            ModuleKind: "",
+            RemoveComments: false,
+            OutFile: "",
+            OutDir: "",
+            GeneratesDeclarations: false,
+            SourceMap: false,
+            MapRoot: "",
+            SourceRoot: "",
+            NoEmitOnError: (version === "1.4")
+        };
+        return dev;
     };
     csproj2ts.programFiles = function () {
         return process.env["ProgramFiles(x86)"] || process.env["ProgramFiles"] || "";
