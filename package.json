@@ -2,7 +2,7 @@
   "name": "csproj2ts",
   "version": "0.0.1",
   "description": "Library to parse TypeScript config info from a Visual Studio Project file",
-  "main": "index.js",
+  "main": "csproj2ts.js",
   "dependencies": {
     "es6-promise": "^2.0.1",
     "lodash": "^3.3.1",
@@ -11,10 +11,13 @@
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-nodeunit": "^0.4.1",
+    "grunt-run": "^0.3.0",
     "grunt-ts": "^3.0.0"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test",
+    "build": "grunt default",
+    "demo": "grunt demo"
   },
   "repository": {
     "type": "git",
@@ -22,12 +25,19 @@
   },
   "keywords": [
     "typescript",
+    "tsc",
     "visual",
     "studio",
     "csproj",
     "vbproj"
   ],
   "author": "Steve Ognibene",
+  "maintainers": [
+    {
+      "name": "nycdotnet",
+      "email": "steve.ognibene@outlook.com"
+    }
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/nycdotnet/csproj2ts/issues"

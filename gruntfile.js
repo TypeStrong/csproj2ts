@@ -14,10 +14,17 @@
         },
         nodeunit: {
             all: ['tests/*tests.js']
+        },
+        run: {
+          demo: {
+            args: ['./demo.js']
+          }
         }
     });
     grunt.loadNpmTasks("grunt-ts");
     grunt.loadNpmTasks("grunt-contrib-nodeunit");
+    grunt.loadNpmTasks("grunt-run");
     grunt.registerTask("default", ["ts"]);
     grunt.registerTask("test", ["ts","nodeunit"]);
+    grunt.registerTask("demo", ["ts","nodeunit","run"]);
 };
