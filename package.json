@@ -1,6 +1,6 @@
 {
   "name": "csproj2ts",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Library to parse TypeScript config info from a Visual Studio Project file",
   "main": "csproj2ts.js",
   "dependencies": {
