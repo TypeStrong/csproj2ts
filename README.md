@@ -4,6 +4,8 @@ Queries a Visual Studio project file (.csproj or .vbproj) for TypeScript configu
 
 Tested with project configuration settings in TypeScript 1.4.
 
+You have to run `npm install` to fetch dependencies prior to using csproj2ts.
+
 Run `node demo.js` for a working example (assumes `csproj2ts.csproj` in current folder).
 
 This module only *collects* the information.  What you do with it after is up to you.
@@ -26,6 +28,14 @@ This module only *collects* the information.  What you do with it after is up to
 
 ```
 
+## Developing:
+
+To build, run `grunt`.
+
+To build and run tests with nodeunit, run `grunt test`.
+
+To build, run tests, and launch the demo script, run `grunt demo`.
+
 ## API:
 
 The returned settings object has the following documented properties:
@@ -35,11 +45,11 @@ The returned settings object has the following documented properties:
     * ProjectFileName: string
     * MSBuildExtensionsPath32: string
     * VisualStudioVersion: string
+    * TypeScriptVersion: string
     * ActiveConfiguration: string
     * DefaultProjectConfiguration?: string;
     * DefaultVisualStudioVersion?: string;
     * TypeScriptDefaultPropsFilePath: string;
-    * NormalizedTypeScriptDefaultPropsFilePath: string;
     * TypeScriptDefaultConfiguration: - this property has the settings (seen below) that correspond to the defaults on the referenced .props file.
 
 
