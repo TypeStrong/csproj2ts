@@ -1,4 +1,3 @@
-.git/
 .idea/
 .tscache/
 bin/
@@ -14,3 +13,4 @@ typings/
 *.suo
 tsconfig.json
 tsd.json
+gruntfile.js
