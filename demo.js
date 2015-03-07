@@ -5,8 +5,12 @@ var vsProjInfo = {
     ActiveConfiguration: "Debug"
 }
 
+console.log("Parsing '" + vsProjInfo.ProjectFileName + "'...");
+
 csproj2ts.getTypeScriptSettings(vsProjInfo).then(function (settings) {
+	  console.log('success!');
     console.log(settings);
 }).catch(function (error) {
+	  console.log('fail!');
     console.log(error);
 });
