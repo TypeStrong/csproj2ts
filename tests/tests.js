@@ -132,5 +132,32 @@ exports.testGroup = {
             test.ok(false, "Should not be any errors.");
             test.done();
         });
+    },
+    finds_common_properties_when_config_specified: function (test) {
+        test.expect(1);
+        var vsProjInfo = {
+            ProjectFileName: "tests/artifacts/hasCommonPropertyGroup.csproj",
+            ActiveConfiguration: "Release"
+        };
+        csproj2ts.getTypeScriptSettings(vsProjInfo).then(function (settings) {
+            test.equal(settings.SourceRoot, "this_is_the_source_root", "expected source root to be = this_is_the_source_root for Release");
+            test.done();
+        }).catch(function (error) {
+            test.ok(false, "Should not be any errors.");
+            test.done();
+        });
+    },
+    finds_common_properties_when_config_not_specified: function (test) {
+        test.expect(1);
+        var vsProjInfo = {
+            ProjectFileName: "tests/artifacts/hasCommonPropertyGroup.csproj"
+        };
+        csproj2ts.getTypeScriptSettings(vsProjInfo).then(function (settings) {
+            test.equal(settings.SourceRoot, "this_is_the_source_root", "expected source root to be = this_is_the_source_root for unspecified config");
+            test.done();
+        }).catch(function (error) {
+            test.ok(false, "Should not be any errors.");
+            test.done();
+        });
     }
 };

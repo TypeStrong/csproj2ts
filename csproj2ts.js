@@ -9,6 +9,12 @@ var csproj2ts;
     var cboolean = function (value) {
         return (typeof value === 'string') ? (value.toLowerCase() === 'true') : value;
     };
+    var getSettingOrDefault = function (item, abbreviatedSettingName, defaultValue) {
+        if (item["TypeScript" + abbreviatedSettingName]) {
+            return item["TypeScript" + abbreviatedSettingName][0];
+        }
+        return defaultValue;
+    };
     var getTSSetting = function (project, abbreviatedSettingName, projectConfiguration, defaultValue) {
         var typeOfGrouping = "PropertyGroup";
         var result = defaultValue;
@@ -19,10 +25,11 @@ var csproj2ts;
                     var condition = item["$"]["Condition"];
                     condition = condition.replace(/ /g, "");
                     if (condition === "'$(Configuration)'=='" + projectConfiguration + "'") {
-                        if (item["TypeScript" + abbreviatedSettingName]) {
-                            result = item["TypeScript" + abbreviatedSettingName][0];
-                        }
+                        result = getSettingOrDefault(item, abbreviatedSettingName, result);
                     }
+                }
+                else {
+                    result = getSettingOrDefault(item, abbreviatedSettingName, result);
                 }
             });
         }

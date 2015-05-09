@@ -62,6 +62,13 @@ module csproj2ts {
         return (typeof value === 'string') ? (value.toLowerCase() === 'true') : value;
     }
 
+    var getSettingOrDefault = <T>(item: any[], abbreviatedSettingName: string, defaultValue: T) => {
+      if (item["TypeScript" + abbreviatedSettingName]) {
+          return item["TypeScript" + abbreviatedSettingName][0];
+      }
+      return defaultValue;
+    };
+
     var getTSSetting = <T>(project: any, abbreviatedSettingName: string, projectConfiguration: string, defaultValue: T): T => {
         var typeOfGrouping = "PropertyGroup";
         var result = defaultValue;
@@ -72,15 +79,15 @@ module csproj2ts {
                     var condition = item["$"]["Condition"];
                     condition = condition.replace(/ /g, "");
                     if (condition === "'$(Configuration)'=='" + projectConfiguration + "'") {
-                        if (item["TypeScript" + abbreviatedSettingName]) {
-                            result = item["TypeScript" + abbreviatedSettingName][0];
-                        }
+                        result = getSettingOrDefault(item, abbreviatedSettingName, result);
                     }
+                } else {
+                  result = getSettingOrDefault(item, abbreviatedSettingName, result);
                 }
             });
         }
         return result;
-    }
+    };
 
     export var xml2jsReadXMLFile = (fileName: string) : Promise<any> => {
         return new Promise((resolve, reject) => {

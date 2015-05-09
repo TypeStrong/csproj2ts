@@ -44,7 +44,6 @@ export var testGroup: nodeunit.ITestGroup = {
             test.ok(false, "Should not be any errors.");
             test.done();
         });
-
     },
     use_TypeScript_fallback_configuration_if_referenced_props_file_not_found: (test: nodeunit.Test) => {
         test.expect(2);
@@ -131,7 +130,6 @@ export var testGroup: nodeunit.ITestGroup = {
             test.equal(result.SourceRoot, "", "expected blank for the Source Root");
             test.equal(result.Target, "ES5", "expected ES5 as the target");
 
-
             test.done();
         }).catch((error) => {
             test.ok(false, "Should not be any errors.");
@@ -148,6 +146,33 @@ export var testGroup: nodeunit.ITestGroup = {
             test.equal(settings.RemoveComments, true, "expected remove comments = true for Release");
             test.equal(settings.SourceMap, false, "expected source map = false for Release");
 
+            test.done();
+        }).catch((error) => {
+            test.ok(false, "Should not be any errors.");
+            test.done();
+        });
+    },
+    finds_common_properties_when_config_specified: (test: nodeunit.Test) => {
+        test.expect(1);
+        var vsProjInfo : csproj2ts.VSProjectParams = {
+            ProjectFileName: "tests/artifacts/hasCommonPropertyGroup.csproj",
+            ActiveConfiguration: "Release"
+        }
+        csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
+            test.equal(settings.SourceRoot, "this_is_the_source_root", "expected source root to be = this_is_the_source_root for Release");
+            test.done();
+        }).catch((error) => {
+            test.ok(false, "Should not be any errors.");
+            test.done();
+        });
+    },
+    finds_common_properties_when_config_not_specified: (test: nodeunit.Test) => {
+        test.expect(1);
+        var vsProjInfo : csproj2ts.VSProjectParams = {
+            ProjectFileName: "tests/artifacts/hasCommonPropertyGroup.csproj"
+        }
+        csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
+            test.equal(settings.SourceRoot, "this_is_the_source_root", "expected source root to be = this_is_the_source_root for unspecified config");
             test.done();
         }).catch((error) => {
             test.ok(false, "Should not be any errors.");
