@@ -1,12 +1,12 @@
 ﻿# csproj2ts
 
-Queries a Visual Studio project file (.csproj or .vbproj) for TypeScript configuration information.  Will also find default config in a `Microsoft.TypeScript.Default.props` file, if referenced by the project.
+Queries a Visual Studio project file (.csproj, .vbproj, .njsproj, etc.) for TypeScript configuration information.  Will also find default config in a `Microsoft.TypeScript.Default.props` file, if referenced by the project.
 
 Tested with project configuration settings in TypeScript 1.4.
 
 ## Install
 
-To install, run `npm install csproj2ts`.  Current version v0.0.2.
+To install, run `npm install csproj2ts`.
 
 This module only *collects* the information.  What you do with it after is up to you.
 
@@ -14,7 +14,7 @@ This module only *collects* the information.  What you do with it after is up to
 ```javascript
 
     var csproj2ts = require('csproj2ts');
-    
+
     var vsProjInfo = {
         ProjectFileName: "path/to/my/project.csproj", // the name and path to the project file
         ActiveConfiguration: "Release"                // the MSBuild config to query
@@ -31,7 +31,7 @@ This module only *collects* the information.  What you do with it after is up to
 
 ## Developing:
 
-You have to run `npm install` to fetch dependencies prior to developing or testing csproj2ts.
+You must run `npm install` to fetch dependencies prior to developing or testing csproj2ts.
 
 To build, run `grunt`.
 
