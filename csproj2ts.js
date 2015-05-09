@@ -207,6 +207,11 @@ var csproj2ts;
         }
         return defaultValue;
     }
+    var highestVisualStudioVersionToTestFor = function () {
+        var currentYear = new Date().getFullYear();
+        return currentYear - 1995;
+    };
+    var minimumVisualStudioVersion = 10;
     var findPropsFileName = function (settings) {
         return new Promise(function (resolve, reject) {
             var propsFileName = csproj2ts.normalizePath(settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, settings);
@@ -215,7 +220,7 @@ var csproj2ts;
                 return;
             }
             var alternateSettings = _.cloneDeep(settings);
-            for (var i = 20; i >= 10; i -= 1) {
+            for (var i = highestVisualStudioVersionToTestFor(); i >= minimumVisualStudioVersion; i -= 1) {
                 alternateSettings.VSProjectDetails.VisualStudioVersion = i.toString() + ".0";
                 propsFileName = csproj2ts.normalizePath(settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, alternateSettings);
                 if (fs.existsSync(propsFileName)) {

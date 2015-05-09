@@ -284,6 +284,14 @@ module csproj2ts {
         return defaultValue;
     }
 
+    var highestVisualStudioVersionToTestFor = function() {
+      // hack: please pretend you didn't see this.
+      var currentYear = new Date().getFullYear();
+      return currentYear - 1995;
+    };
+
+    var minimumVisualStudioVersion = 10;
+
     var findPropsFileName = (settings: TypeScriptSettings): Promise<string> => {
       return new Promise((resolve, reject) => {
 
@@ -296,7 +304,7 @@ module csproj2ts {
 
         var alternateSettings = _.cloneDeep(settings);
 
-        for (var i = 20; i >= 10; i-=1) {
+        for (var i = highestVisualStudioVersionToTestFor(); i >= minimumVisualStudioVersion; i-=1) {
 
           alternateSettings.VSProjectDetails.VisualStudioVersion = i.toString() + ".0";
           propsFileName = normalizePath(settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, alternateSettings);
@@ -310,7 +318,6 @@ module csproj2ts {
 
       });
     }
-
 
     export var getTypeScriptDefaultsFromPropsFileOrDefaults =
         (settings: TypeScriptSettings): Promise<TypeScriptConfiguration> => {
