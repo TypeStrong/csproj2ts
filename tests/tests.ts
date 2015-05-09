@@ -23,7 +23,7 @@ export var testGroup: nodeunit.ITestGroup = {
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
             test.done();
         }).catch((error) => {
-            test.equal(error.errno, 34, "Expected file not found error.");
+            test.equal(error.code, "ENOENT", "Expected file not found error.");
             test.done();
         });
 
