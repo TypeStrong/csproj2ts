@@ -29,7 +29,7 @@ export var testGroup: nodeunit.ITestGroup = {
 
     },
     find_default_settings: (test: nodeunit.Test) => {
-        test.expect(4);
+        test.expect(6);
         var vsProjInfo = {
             ProjectFileName: "tests/artifacts/example1.csproj",
         }
@@ -39,6 +39,8 @@ export var testGroup: nodeunit.ITestGroup = {
             test.equal(settings.VSProjectDetails.DefaultProjectConfiguration, "Debug", "Expected 'Debug' to be the default config.");
             test.equal(settings.VSProjectDetails.DefaultVisualStudioVersion, "12.0", "Expected '12.0' to be the default VS version.");
             test.equal(settings.VSProjectDetails.MSBuildExtensionsPath32, programFiles + "\\MSBuild\\", "Expected correct value to be automatically set for MSBuildExtensionsPath32.");
+            test.equal(settings.ExperimentalDecorators, true,"Expected experimental decorators to be active.")
+            test.equal(settings.EmitDecoratorMetadata, true,"Expected decorator metadata to be active.")
             test.done();
         }).catch((error) => {
             test.ok(false, "Should not be any errors.");
@@ -85,8 +87,8 @@ export var testGroup: nodeunit.ITestGroup = {
         });
 
     },
-    default_to_es5_with_TypeScript_1_5: (test: nodeunit.Test) => {
-        test.expect(1);
+    default_settings_work_with_TypeScript_1_5: (test: nodeunit.Test) => {
+        test.expect(3);
         var vsProjInfo = {
             ProjectFileName: "tests/artifacts/example1.csproj",
             TypeScriptVersion: "1.5",
@@ -94,7 +96,9 @@ export var testGroup: nodeunit.ITestGroup = {
         }
 
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
-            test.equal( settings.Target, "ES5" , "Expected ES5 default.");
+            test.strictEqual( settings.Target, "ES5" , "Expected ES5 default.");
+            test.strictEqual(settings.ExperimentalDecorators, undefined,"Expected experimental decorators to be active.")
+            test.strictEqual(settings.EmitDecoratorMetadata, undefined,"Expected decorator metadata to be active.")
             test.done();
         }).catch((error) => {
             test.ok(false, "Should not be any errors.");

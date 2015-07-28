@@ -2,7 +2,7 @@
 
 Queries a Visual Studio project file (.csproj, .vbproj, .njsproj, etc.) for TypeScript configuration information.  Will also find default config in a `Microsoft.TypeScript.Default.props` file, if referenced by the project.
 
-Tested with project configuration settings in TypeScript 1.4.
+Tested with new project configuration settings in TypeScript 1.5.3.
 
 ## Install
 
@@ -74,19 +74,29 @@ The returned settings object has the following properties that correspond to Typ
   * AdditionalFlags?: string;
   * Charset?: string;
   * CodePage?: string;
+  * CompileBlocked?: boolean;
   * CompileOnSaveEnabled?: boolean;
   * EmitBOM?: boolean;
+  * EmitDecoratorMetadata?: boolean;
+  * ExperimentalDecorators?: boolean;
   * GeneratesDeclarations?: boolean;
+  * InlineSourceMap?: boolean;
+  * InlineSources?: boolean;
+  * IsolatedModules?: boolean;
   * MapRoot?: string;
   * ModuleKind?: string;
+  * NewLine?: string;
   * NoEmitOnError?: boolean;
+  * NoEmitHelpers?: boolean;
   * NoImplicitAny?: boolean;
   * NoLib?: boolean;
   * NoResolve?: boolean;
   * OutFile?: string;
   * OutDir?: string;
   * PreserveConstEnums?: boolean;
+  * PreferredUILang?: string;
   * RemoveComments?: boolean;
+  * RootDir?: boolean;
   * SourceMap?: boolean;
   * SourceRoot?: string;
   * SuppressImplicitAnyIndexErrors?: boolean;
