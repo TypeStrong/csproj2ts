@@ -1,5 +1,5 @@
 {
-    "version": "1.4.1",
+    "version": "1.5.3",
     "compilerOptions": {
         "target": "es5",
         "module": "commonjs",
@@ -20,6 +20,7 @@
         "./typings/lodash/lodash.d.ts",
         "./typings/node/node.d.ts",
         "./typings/nodeunit/nodeunit.d.ts",
+        "./typings/semver/semver.d.ts",
         "./typings/tsd.d.ts",
         "./typings/xml2js/xml2js.d.ts"
     ]

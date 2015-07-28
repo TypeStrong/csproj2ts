@@ -19,6 +19,9 @@
     },
     "es6-promise/es6-promise.d.ts": {
       "commit": "bb465f2cc799a41a7ccb688c6d1a8f5583dda12d"
+    },
+    "semver/semver.d.ts": {
+      "commit": "58b218c39aae6f40d609ab2230fc1972749dca7c"
     }
   }
 }

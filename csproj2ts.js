@@ -4,8 +4,10 @@ var _ = require("lodash");
 var path = require("path");
 var _PromiseLibrary = require('es6-promise');
 var Promise = _PromiseLibrary.Promise;
+var semver = require('semver');
 var csproj2ts;
 (function (csproj2ts) {
+    csproj2ts.DEFAULT_TYPESCRIPT_VERSION = "1.5.3";
     var cboolean = function (value) {
         return (typeof value === 'string') ? (value.toLowerCase() === 'true') : value;
     };
@@ -14,6 +16,28 @@ var csproj2ts;
             return item["TypeScript" + abbreviatedSettingName][0];
         }
         return defaultValue;
+    };
+    csproj2ts.fixVersion = function (version) {
+        var testVersion = version + "";
+        if (!testVersion) {
+            return csproj2ts.DEFAULT_TYPESCRIPT_VERSION;
+        }
+        if (testVersion.indexOf("-") > -1) {
+            var versionInfo = testVersion.split("-");
+            testVersion = versionInfo[0];
+        }
+        if (semver.valid(testVersion)) {
+            return testVersion;
+        }
+        testVersion += ".0";
+        if (semver.valid(testVersion)) {
+            return testVersion;
+        }
+        testVersion += ".0";
+        if (semver.valid(testVersion)) {
+            return testVersion;
+        }
+        return csproj2ts.DEFAULT_TYPESCRIPT_VERSION;
     };
     var getTSSetting = function (project, abbreviatedSettingName, projectConfiguration, defaultValue) {
         var typeOfGrouping = "PropertyGroup";
@@ -73,12 +97,13 @@ var csproj2ts;
                             MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
                             ProjectFileName: projectInfo.ProjectFileName,
                             VisualStudioVersion: projectInfo.VisualStudioVersion,
-                            TypeScriptVersion: projectInfo.TypeScriptVersion
+                            TypeScriptVersion: csproj2ts.fixVersion(projectInfo.TypeScriptVersion)
                         },
                         files: getTypeScriptFilesToCompile(project),
                         AdditionalFlags: getTSSetting(project, "AdditionalFlags", projectActiveConfig, undefined),
                         Charset: getTSSetting(project, "Charset", projectActiveConfig, undefined),
                         CodePage: getTSSetting(project, "CodePage", projectActiveConfig, undefined),
+                        CompileBlocked: getTSSetting(project, "CompileBlocked", projectActiveConfig, false),
                         CompileOnSaveEnabled: cboolean(getTSSetting(project, "CompileOnSaveEnabled", projectActiveConfig, undefined)),
                         EmitBOM: cboolean(getTSSetting(project, "EmitBOM", projectActiveConfig, undefined)),
                         GeneratesDeclarations: cboolean(getTSSetting(project, "GeneratesDeclarations", projectActiveConfig, undefined)),
@@ -97,7 +122,8 @@ var csproj2ts;
                         SuppressImplicitAnyIndexErrors: cboolean(getTSSetting(project, "SuppressImplicitAnyIndexErrors", projectActiveConfig, undefined)),
                         Target: getTSSetting(project, "Target", projectActiveConfig, undefined)
                     };
-                    csproj2ts.getTypeScriptDefaultsFromPropsFileOrDefaults(result).then(function (typeScriptDefaults) {
+                    csproj2ts.getTypeScriptDefaultsFromPropsFileOrDefaults(result)
+                        .then(function (typeScriptDefaults) {
                         result.VSProjectDetails.TypeScriptDefaultConfiguration = typeScriptDefaults;
                         finishUp(typeScriptDefaults);
                     }).catch(function (error) {
@@ -263,9 +289,7 @@ var csproj2ts;
                         result.NoEmitOnError = getFirstValueOrDefault(pg.TypeScript, def.NoEmitOnError);
                         resolve(result);
                     }
-                }, function (error) {
-                    reject(error);
-                });
+                }, function (error) { reject(error); });
             }, function (error) {
                 reject(error);
             });
@@ -273,10 +297,12 @@ var csproj2ts;
     };
     var VSTypeScriptDefaults = function (version) {
         if (!version) {
-            version = "1.4";
+            version = csproj2ts.DEFAULT_TYPESCRIPT_VERSION;
         }
+        var target = semver.lt(version, "1.5.0") ? "ES3" : "ES5";
+        var noEmitOnError = semver.gte(version, "1.4.0");
         var dev = {
-            Target: "ES3",
+            Target: target,
             CompileOnSaveEnabled: false,
             NoImplicitAny: false,
             ModuleKind: "",
@@ -287,7 +313,7 @@ var csproj2ts;
             SourceMap: false,
             MapRoot: "",
             SourceRoot: "",
-            NoEmitOnError: (version === "1.4")
+            NoEmitOnError: noEmitOnError
         };
         return dev;
     };

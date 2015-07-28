@@ -39,6 +39,18 @@ To build and run tests with nodeunit, run `grunt test`.
 
 To build, run tests, and launch the demo script, run `grunt demo`.  (You can also run `node demo.js` directly (assumes `csproj2ts.csproj` in current folder).)
 
+### Quickstart for debugging with Node Inspector
+
+Install [Node Inspector](https://github.com/node-inspector/node-inspector) via npm:
+
+`npm install -g node-inspector`
+
+Example command-line to debug a particular test ("test_run_at_all") on Windows:
+
+`node-debug --debug-brk "./node_modules/grunt-contrib-nodeunit/node_modules/nodeunit/bin/nodeunit" "tests/tests.js" -t "tests_run_at_all"`
+
+Set breakpoints in the Chrome dev tools, or use `debugger;` where needed.
+
 
 ## API:
 

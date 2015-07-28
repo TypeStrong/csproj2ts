@@ -4,8 +4,12 @@ import _ = require("lodash");
 import path = require("path");
 import _PromiseLibrary = require('es6-promise');
 var Promise = _PromiseLibrary.Promise;
+import * as semver from 'semver';
 
 module csproj2ts {
+
+    export const DEFAULT_TYPESCRIPT_VERSION = "1.5.3";
+
     export interface TypeScriptSettings extends TypeScriptConfiguration {
         VSProjectDetails?: VSProjectDetails;
         files?: string[];
@@ -38,19 +42,29 @@ module csproj2ts {
         AdditionalFlags?: string;
         Charset?: string;
         CodePage?: string;
+        CompileBlocked?: boolean;  // added in TypeScript 1.5 / VS 2015
         CompileOnSaveEnabled?: boolean;
         EmitBOM?: boolean;
+        EmitDecoratorMetadata?: boolean;
+        ExperimentalDecorators?: boolean;
         GeneratesDeclarations?: boolean;
+        InlineSourceMap?: boolean;
+        InlineSources?: boolean;
+        IsolatedModules?: boolean;
         MapRoot?: string;
         ModuleKind?: string;
+        NewLine?: string;
         NoEmitOnError?: boolean;
+        NoEmitHelpers?: boolean;
         NoImplicitAny?: boolean;
         NoLib?: boolean;
         NoResolve?: boolean;
         OutFile?: string;
         OutDir?: string;
         PreserveConstEnums?: boolean;
+        PreferredUILang?: string;
         RemoveComments?: boolean;
+        RootDir?: boolean;
         SourceMap?: boolean;
         SourceRoot?: string;
         SuppressImplicitAnyIndexErrors?: boolean;
@@ -68,6 +82,29 @@ module csproj2ts {
       }
       return defaultValue;
     };
+
+    export const fixVersion = (version: string) => {
+      let testVersion = version + "";
+      if (!testVersion) {
+        return DEFAULT_TYPESCRIPT_VERSION;
+      }
+      if (testVersion.indexOf("-") > -1) {
+        let versionInfo = testVersion.split("-");
+        testVersion = versionInfo[0];
+      }
+      if (semver.valid(testVersion)) {
+        return testVersion;
+      }
+      testVersion += ".0";
+      if (semver.valid(testVersion)) {
+        return testVersion;
+      }
+      testVersion += ".0";
+      if (semver.valid(testVersion)) {
+        return testVersion;
+      }
+      return DEFAULT_TYPESCRIPT_VERSION;
+    }
 
     var getTSSetting = <T>(project: any, abbreviatedSettingName: string, projectConfiguration: string, defaultValue: T): T => {
         var typeOfGrouping = "PropertyGroup";
@@ -117,6 +154,7 @@ module csproj2ts {
                 if (!parsedVSProject || !parsedVSProject.Project) {
                     reject(new Error("No result from parsing the project."));
                 } else {
+
                     var project = parsedVSProject.Project;
                     var projectDefaultConfig = getDefaultConfiguration(project);
                     var projectActiveConfig = projectInfo.ActiveConfiguration || projectDefaultConfig;
@@ -129,12 +167,13 @@ module csproj2ts {
                             MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
                             ProjectFileName: projectInfo.ProjectFileName,
                             VisualStudioVersion: projectInfo.VisualStudioVersion,
-                            TypeScriptVersion: projectInfo.TypeScriptVersion
+                            TypeScriptVersion: fixVersion(projectInfo.TypeScriptVersion)
                         },
                         files: getTypeScriptFilesToCompile(project),
                         AdditionalFlags: getTSSetting(project, "AdditionalFlags", projectActiveConfig, undefined),
                         Charset: getTSSetting(project, "Charset", projectActiveConfig, undefined),
                         CodePage: getTSSetting(project, "CodePage", projectActiveConfig, undefined),
+                        CompileBlocked: getTSSetting(project, "CompileBlocked", projectActiveConfig, false),
                         CompileOnSaveEnabled: cboolean(getTSSetting(project, "CompileOnSaveEnabled", projectActiveConfig, undefined)),
                         EmitBOM: cboolean(getTSSetting(project, "EmitBOM", projectActiveConfig, undefined)),
                         GeneratesDeclarations: cboolean(getTSSetting(project, "GeneratesDeclarations", projectActiveConfig, undefined)),
@@ -156,10 +195,8 @@ module csproj2ts {
 
                     getTypeScriptDefaultsFromPropsFileOrDefaults(result)
                         .then((typeScriptDefaults) => {
-
-                        result.VSProjectDetails.TypeScriptDefaultConfiguration = typeScriptDefaults;
-                        finishUp(typeScriptDefaults);
-
+                          result.VSProjectDetails.TypeScriptDefaultConfiguration = typeScriptDefaults;
+                          finishUp(typeScriptDefaults);
                     }).catch((error) => {
                         var fallbackDefaults = VSTypeScriptDefaults(result.VSProjectDetails.TypeScriptVersion);
                         result.VSProjectDetails.TypeScriptDefaultConfiguration = fallbackDefaults;
@@ -297,7 +334,7 @@ module csproj2ts {
       return currentYear - 1995;
     };
 
-    var minimumVisualStudioVersion = 10;
+    const minimumVisualStudioVersion = 10;
 
     var findPropsFileName = (settings: TypeScriptSettings): Promise<string> => {
       return new Promise((resolve, reject) => {
@@ -328,7 +365,6 @@ module csproj2ts {
 
     export var getTypeScriptDefaultsFromPropsFileOrDefaults =
         (settings: TypeScriptSettings): Promise<TypeScriptConfiguration> => {
-
             return new Promise((resolve, reject) => {
               findPropsFileName(settings).then((propsFileName) => {
                 xml2jsReadXMLFile(propsFileName).then((parsedPropertiesFile) => {
@@ -367,11 +403,14 @@ module csproj2ts {
     var VSTypeScriptDefaults = (version?: string) => {
 
       if (!version) {
-        version = "1.4";
+        version = DEFAULT_TYPESCRIPT_VERSION;
       }
 
+      const target = semver.lt(version,"1.5.0") ? "ES3" : "ES5";
+      const noEmitOnError = semver.gte(version,"1.4.0");
+
       var dev: TypeScriptConfiguration = {
-        Target : "ES3",
+        Target : target,
         CompileOnSaveEnabled : false,
         NoImplicitAny : false,
         ModuleKind : "",
@@ -382,7 +421,7 @@ module csproj2ts {
         SourceMap : false,
         MapRoot : "",
         SourceRoot : "",
-        NoEmitOnError : (version === "1.4")
+        NoEmitOnError : noEmitOnError
       };
 
       return dev;

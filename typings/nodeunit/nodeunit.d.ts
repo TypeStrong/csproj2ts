@@ -50,10 +50,10 @@ declare module 'nodeunit' {
 	export interface ITestGroup {
 		setUp?: (callback: ICallbackFunction) => void;
 		tearDown?: (callback: ICallbackFunction) => void;
+		[property: string] : ITestBody | ((callback: ICallbackFunction) => void);
 	}
 
 	export interface ICallbackFunction {
 		(err?: any): void;
 	}
 }
-

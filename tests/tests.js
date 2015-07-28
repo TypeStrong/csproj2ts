@@ -72,6 +72,30 @@ exports.testGroup = {
             test.done();
         });
     },
+    default_to_es5_with_TypeScript_1_5: function (test) {
+        test.expect(1);
+        var vsProjInfo = {
+            ProjectFileName: "tests/artifacts/example1.csproj",
+            TypeScriptVersion: "1.5",
+            ActiveConfiguration: "Release"
+        };
+        csproj2ts.getTypeScriptSettings(vsProjInfo).then(function (settings) {
+            test.equal(settings.Target, "ES5", "Expected ES5 default.");
+            test.done();
+        }).catch(function (error) {
+            test.ok(false, "Should not be any errors.");
+            test.done();
+        });
+    },
+    test_fixVersion: function (test) {
+        test.expect(5);
+        test.equal(csproj2ts.fixVersion("1"), "1.0.0");
+        test.equal(csproj2ts.fixVersion("1.2"), "1.2.0");
+        test.equal(csproj2ts.fixVersion("1.5.3"), "1.5.3");
+        test.equal(csproj2ts.fixVersion("1.5.1-alpha"), "1.5.1");
+        test.equal(csproj2ts.fixVersion(""), csproj2ts.DEFAULT_TYPESCRIPT_VERSION);
+        test.done();
+    },
     identify_all_typeScript_files_properly: function (test) {
         test.expect(2);
         var vsProjInfo = {
@@ -93,7 +117,8 @@ exports.testGroup = {
                 TypeScriptDefaultPropsFilePath: "tests/artifacts/Microsoft.TypeScript.Default.props"
             }
         };
-        csproj2ts.getTypeScriptDefaultsFromPropsFileOrDefaults(settings).then(function (result) {
+        csproj2ts.getTypeScriptDefaultsFromPropsFileOrDefaults(settings)
+            .then(function (result) {
             test.equal(result.AdditionalFlags, undefined);
             test.equal(result.Charset, undefined);
             test.equal(result.CodePage, undefined);
