@@ -14,3 +14,4 @@ typings/
 tsconfig.json
 tsd.json
 gruntfile.js
+!csproj2ts.d.ts
