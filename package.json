@@ -43,5 +43,6 @@
   "bugs": {
     "url": "https://github.com/TypeStrong/csproj2ts/issues"
   },
-  "homepage": "https://github.com/TypeStrong/csproj2ts"
+  "homepage": "https://github.com/TypeStrong/csproj2ts",
+  "typings": "csproj2ts.d.ts"
 }
