@@ -248,7 +248,6 @@ module csproj2ts {
             path = path.replace(/\$\(MSBuildExtensionsPath32\)/g,
                 settings.VSProjectDetails.MSBuildExtensionsPath32
                 );
-            //path = path.replace(/\\\\/g, "\\"); //fix extra backslashes in path
         }
         return path;
     };
