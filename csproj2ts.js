@@ -1,13 +1,12 @@
 var fs = require('fs');
 var xml2js = require('xml2js');
-var _ = require("lodash");
-var path = require("path");
-var _PromiseLibrary = require('es6-promise');
-var Promise = _PromiseLibrary.Promise;
+var _ = require('lodash');
+var path = require('path');
+var es6_promise_1 = require('es6-promise');
 var semver = require('semver');
 var csproj2ts;
 (function (csproj2ts) {
-    csproj2ts.DEFAULT_TYPESCRIPT_VERSION = "1.5.3";
+    csproj2ts.DEFAULT_TYPESCRIPT_VERSION = "1.6.2";
     var cboolean = function (value) {
         return (typeof value === 'string') ? (value.toLowerCase() === 'true') : value;
     };
@@ -60,7 +59,7 @@ var csproj2ts;
         return result;
     };
     csproj2ts.xml2jsReadXMLFile = function (fileName) {
-        return new Promise(function (resolve, reject) {
+        return new es6_promise_1.Promise(function (resolve, reject) {
             var parser = new xml2js.Parser();
             parser.addListener('end', function (parsedXMLFileResult) {
                 resolve(parsedXMLFileResult);
@@ -79,7 +78,7 @@ var csproj2ts;
         if (!projectInfo.MSBuildExtensionsPath32) {
             projectInfo.MSBuildExtensionsPath32 = path.join(csproj2ts.programFiles(), "/MSBuild/");
         }
-        return new Promise(function (resolve, reject) {
+        return new es6_promise_1.Promise(function (resolve, reject) {
             csproj2ts.xml2jsReadXMLFile(projectInfo.ProjectFileName).then(function (parsedVSProject) {
                 if (!parsedVSProject || !parsedVSProject.Project) {
                     reject(new Error("No result from parsing the project."));
@@ -107,13 +106,16 @@ var csproj2ts;
                         CompileOnSaveEnabled: cboolean(getTSSetting(project, "CompileOnSaveEnabled", projectActiveConfig, undefined)),
                         EmitBOM: cboolean(getTSSetting(project, "EmitBOM", projectActiveConfig, undefined)),
                         EmitDecoratorMetadata: cboolean(getTSSetting(project, "EmitDecoratorMetadata", projectActiveConfig, undefined)),
+                        ExperimentalAsyncFunctions: cboolean(getTSSetting(project, "ExperimentalAsyncFunctions", projectActiveConfig, undefined)),
                         ExperimentalDecorators: cboolean(getTSSetting(project, "ExperimentalDecorators", projectActiveConfig, undefined)),
                         GeneratesDeclarations: cboolean(getTSSetting(project, "GeneratesDeclarations", projectActiveConfig, undefined)),
                         InlineSourceMap: cboolean(getTSSetting(project, "InlineSourceMap", projectActiveConfig, undefined)),
                         InlineSources: cboolean(getTSSetting(project, "InlineSources", projectActiveConfig, undefined)),
                         IsolatedModules: cboolean(getTSSetting(project, "IsolatedModules", projectActiveConfig, undefined)),
+                        JSXEmit: getTSSetting(project, "JSXEmit", projectActiveConfig, undefined),
                         MapRoot: getTSSetting(project, "MapRoot", projectActiveConfig, undefined),
                         ModuleKind: getTSSetting(project, "ModuleKind", projectActiveConfig, undefined),
+                        ModuleResolution: getTSSetting(project, "ModuleResolution", projectActiveConfig, undefined),
                         NewLine: getTSSetting(project, "NewLine", projectActiveConfig, undefined),
                         NoEmitOnError: cboolean(getTSSetting(project, "NoEmitOnError", projectActiveConfig, undefined)),
                         NoEmitHelpers: cboolean(getTSSetting(project, "NoEmitHelpers", projectActiveConfig, undefined)),
@@ -129,6 +131,7 @@ var csproj2ts;
                         SourceMap: cboolean(getTSSetting(project, "SourceMap", projectActiveConfig, undefined)),
                         SourceRoot: getTSSetting(project, "SourceRoot", projectActiveConfig, undefined),
                         SuppressImplicitAnyIndexErrors: cboolean(getTSSetting(project, "SuppressImplicitAnyIndexErrors", projectActiveConfig, undefined)),
+                        SuppressExcessPropertyErrors: cboolean(getTSSetting(project, "SuppressExcessPropertyErrors", projectActiveConfig, undefined)),
                         Target: getTSSetting(project, "Target", projectActiveConfig, undefined)
                     };
                     csproj2ts.getTypeScriptDefaultsFromPropsFileOrDefaults(result)
@@ -255,7 +258,7 @@ var csproj2ts;
     };
     var minimumVisualStudioVersion = 10;
     var findPropsFileName = function (settings) {
-        return new Promise(function (resolve, reject) {
+        return new es6_promise_1.Promise(function (resolve, reject) {
             var propsFileName = csproj2ts.normalizePath(settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, settings);
             if (fs.existsSync(propsFileName)) {
                 resolve(propsFileName);
@@ -274,7 +277,7 @@ var csproj2ts;
         });
     };
     csproj2ts.getTypeScriptDefaultsFromPropsFileOrDefaults = function (settings) {
-        return new Promise(function (resolve, reject) {
+        return new es6_promise_1.Promise(function (resolve, reject) {
             findPropsFileName(settings).then(function (propsFileName) {
                 csproj2ts.xml2jsReadXMLFile(propsFileName).then(function (parsedPropertiesFile) {
                     if (!parsedPropertiesFile || !parsedPropertiesFile.Project || !parsedPropertiesFile.Project.PropertyGroup) {

@@ -7,6 +7,7 @@
                     target: 'es5',
                     module: 'commonjs',
                     sourceMap: false,
+                    declaration: true,
                     noImplicitAny: true,
                     suppressImplicitAnyIndexErrors: true
                 }

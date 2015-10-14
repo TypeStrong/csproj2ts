@@ -2,7 +2,9 @@
 
 Queries a Visual Studio project file (.csproj, .vbproj, .njsproj, etc.) for TypeScript configuration information.  Will also find default config in a `Microsoft.TypeScript.Default.props` file, if referenced by the project.
 
-Tested with new project configuration settings in TypeScript 1.5.3.
+Visual Studio TypeScript settings are documented on the TypeScript wiki [here](https://github.com/Microsoft/TypeScript/wiki/Setting-Compiler-Options-in-MSBuild-projects).
+
+Tested with new project configuration settings in TypeScript 1.6.2.
 
 ## Install
 
