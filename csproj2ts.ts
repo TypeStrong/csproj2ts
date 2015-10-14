@@ -7,7 +7,7 @@ import * as semver from 'semver';
 
 module csproj2ts {
 
-    export const DEFAULT_TYPESCRIPT_VERSION = "1.5.3";
+    export const DEFAULT_TYPESCRIPT_VERSION = "1.6.2";
 
     export interface TypeScriptSettings extends TypeScriptConfiguration {
         VSProjectDetails?: VSProjectDetails;
