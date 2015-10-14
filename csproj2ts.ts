@@ -1,9 +1,8 @@
-﻿import fs = require('fs');
-import xml2js = require('xml2js');
-import _ = require("lodash");
-import path = require("path");
-import _PromiseLibrary = require('es6-promise');
-var Promise = _PromiseLibrary.Promise;
+import * as fs from 'fs';
+import * as xml2js from 'xml2js';
+import * as _ from 'lodash';
+import * as path from 'path';
+import {Promise} from 'es6-promise';
 import * as semver from 'semver';
 
 module csproj2ts {
