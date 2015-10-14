@@ -80,13 +80,16 @@ The returned settings object has the following properties that correspond to Typ
   * CompileOnSaveEnabled?: boolean;
   * EmitBOM?: boolean;
   * EmitDecoratorMetadata?: boolean;
+  * ExperimentalAsyncFunctions?: boolean;
   * ExperimentalDecorators?: boolean;
   * GeneratesDeclarations?: boolean;
   * InlineSourceMap?: boolean;
   * InlineSources?: boolean;
   * IsolatedModules?: boolean;
+  * JSXEmit?: string;
   * MapRoot?: string;
   * ModuleKind?: string;
+  * ModuleResolution?: string;
   * NewLine?: string;
   * NoEmitOnError?: boolean;
   * NoEmitHelpers?: boolean;
@@ -102,4 +105,5 @@ The returned settings object has the following properties that correspond to Typ
   * SourceMap?: boolean;
   * SourceRoot?: string;
   * SuppressImplicitAnyIndexErrors?: boolean;
+  * SuppressExcessPropertyErrors?: boolean;
   * Target?: string;
