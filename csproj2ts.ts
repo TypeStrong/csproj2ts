@@ -35,7 +35,8 @@ module csproj2ts {
     }
 
     /** Configuration tags used by Visual Studio TypeScript Project Properties/MSBuild.
-     * url: * https://github.com/Microsoft/TypeScript/issues/1712#issuecomment-70574319
+     * https://github.com/Microsoft/TypeScript/issues/1712#issuecomment-70574319
+     * https://github.com/Microsoft/TypeScript/wiki/Setting-Compiler-Options-in-MSBuild-projects
      * */
     export interface TypeScriptConfiguration {
         AdditionalFlags?: string;
