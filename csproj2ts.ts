@@ -46,13 +46,16 @@ module csproj2ts {
         CompileOnSaveEnabled?: boolean;
         EmitBOM?: boolean;
         EmitDecoratorMetadata?: boolean;
+        ExperimentalAsyncFunctions?: boolean;
         ExperimentalDecorators?: boolean;
         GeneratesDeclarations?: boolean;
         InlineSourceMap?: boolean;
         InlineSources?: boolean;
         IsolatedModules?: boolean;
+        JSXEmit?: string;
         MapRoot?: string;
         ModuleKind?: string;
+        ModuleResolution?: string;
         NewLine?: string;
         NoEmitOnError?: boolean;
         NoEmitHelpers?: boolean;
@@ -62,12 +65,13 @@ module csproj2ts {
         OutFile?: string;
         OutDir?: string;
         PreserveConstEnums?: boolean;
-        PreferredUILang?: string;
+        PreferredUILang?: string; // implements --locale
         RemoveComments?: boolean;
         RootDir?: boolean;
         SourceMap?: boolean;
         SourceRoot?: string;
         SuppressImplicitAnyIndexErrors?: boolean;
+        SuppressExcessPropertyErrors?: boolean;
         Target?: string;
     }
 
@@ -177,13 +181,16 @@ module csproj2ts {
                         CompileOnSaveEnabled: cboolean(getTSSetting(project, "CompileOnSaveEnabled", projectActiveConfig, undefined)),
                         EmitBOM: cboolean(getTSSetting(project, "EmitBOM", projectActiveConfig, undefined)),
                         EmitDecoratorMetadata: cboolean(getTSSetting(project, "EmitDecoratorMetadata", projectActiveConfig, undefined)),
+                        ExperimentalAsyncFunctions: cboolean(getTSSetting(project, "ExperimentalAsyncFunctions", projectActiveConfig, undefined)),
                         ExperimentalDecorators: cboolean(getTSSetting(project, "ExperimentalDecorators", projectActiveConfig, undefined)),
                         GeneratesDeclarations: cboolean(getTSSetting(project, "GeneratesDeclarations", projectActiveConfig, undefined)),
                         InlineSourceMap: cboolean(getTSSetting(project, "InlineSourceMap", projectActiveConfig, undefined)),
                         InlineSources: cboolean(getTSSetting(project, "InlineSources", projectActiveConfig, undefined)),
                         IsolatedModules: cboolean(getTSSetting(project, "IsolatedModules", projectActiveConfig, undefined)),
+                        JSXEmit: getTSSetting(project, "JSXEmit", projectActiveConfig, undefined),
                         MapRoot: getTSSetting(project, "MapRoot", projectActiveConfig, undefined),
                         ModuleKind: getTSSetting(project, "ModuleKind", projectActiveConfig, undefined),
+                        ModuleResolution: getTSSetting(project, "ModuleResolution", projectActiveConfig, undefined),
                         NewLine: getTSSetting(project, "NewLine", projectActiveConfig, undefined),
                         NoEmitOnError: cboolean(getTSSetting(project, "NoEmitOnError", projectActiveConfig, undefined)),
                         NoEmitHelpers: cboolean(getTSSetting(project, "NoEmitHelpers", projectActiveConfig, undefined)),
@@ -199,6 +206,7 @@ module csproj2ts {
                         SourceMap: cboolean(getTSSetting(project, "SourceMap", projectActiveConfig, undefined)),
                         SourceRoot: getTSSetting(project, "SourceRoot", projectActiveConfig, undefined),
                         SuppressImplicitAnyIndexErrors: cboolean(getTSSetting(project, "SuppressImplicitAnyIndexErrors", projectActiveConfig, undefined)),
+                        SuppressExcessPropertyErrors: cboolean(getTSSetting(project, "SuppressExcessPropertyErrors", projectActiveConfig, undefined)),
                         Target: getTSSetting(project, "Target", projectActiveConfig, undefined)
                     };
 
