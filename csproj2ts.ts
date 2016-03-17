@@ -302,13 +302,15 @@ module csproj2ts {
     var getTypeScriptFilesToCompile = (project: any): string[]=> {
         var typeOfGrouping = "ItemGroup"
         var result: string[] = [];
+        var osPath: string;
         if (project[typeOfGrouping]) {
             var items = toArray(project[typeOfGrouping]);
             _.map(items,(item) => {
                 if (item["TypeScriptCompile"]) {
                     _.map(toArray(item["TypeScriptCompile"]),(compileItem) => {
                         if (compileItem["$"] && compileItem["$"]["Include"]) {
-                            result.push(compileItem["$"]["Include"]);
+                            osPath = compileItem["$"]["Include"].replace(/\\/g,"/");
+                            result.push(osPath);
                         }
                     });
                 }
