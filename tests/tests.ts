@@ -47,6 +47,21 @@ export var testGroup: nodeunit.ITestGroup = {
             test.done();
         });
     },
+    find_default_settings_vs2015: (test: nodeunit.Test) => {
+        test.expect(2);
+        var vsProjInfo = {
+            ProjectFileName: "tests/artifacts/vs2015project.csproj",
+        }
+
+        csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
+            test.equal(settings.VSProjectDetails.DefaultProjectConfiguration, "Debug", "Expected 'Debug' to be the default config.");
+            test.equal(settings.VSProjectDetails.DefaultProjectPlatform, "AnyCPU", "Expected 'AnyCPU' to be the default platform.");
+            test.done();
+        }).catch((error) => {
+            test.ok(false, "Should not be any errors.  got: " + error);
+            test.done();
+        });
+    },
     use_TypeScript_fallback_configuration_if_referenced_props_file_not_found: (test: nodeunit.Test) => {
         test.expect(2);
         var vsProjInfo = {
@@ -122,7 +137,7 @@ export var testGroup: nodeunit.ITestGroup = {
         }
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
             test.equal(settings.files.length, 16, "Expected to see the correct number of TypeScript files.");
-            test.ok(settings.files.indexOf("tasks\ts.ts") !== 0, "Expected to see tasks\ts.ts in the files list.");
+            test.ok(settings.files.indexOf("tasks/ts.ts") !== 0, "Expected to see tasks/ts.ts in the files list.");
             test.done();
         }).catch((error) => {
             test.ok(false, "Should not be any errors.");
@@ -208,5 +223,25 @@ export var testGroup: nodeunit.ITestGroup = {
             test.ok(false, "Should not be any errors.");
             test.done();
         });
-    }
+    },
+    vs2015_project_works_as_expected: (test: nodeunit.Test) => {
+        test.expect(6);
+        var vsProjInfo = {
+            ProjectFileName: "tests/artifacts/vs2015project.csproj"
+        }
+
+        csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
+            test.equal(settings.OutDir, "C:/REDACTED/PATH/TO/PROJECT/FOLDER/jsOut");
+            test.equal(settings.ModuleKind, "System");
+            test.equal(settings.EmitDecoratorMetadata, true);
+            test.equal(settings.ExperimentalDecorators, true);
+            test.equal(settings.GeneratesDeclarations, true);
+            test.equal(settings.ModuleResolution, "node");
+
+            test.done();
+        }).catch((error) => {
+            test.ok(false, "Should not be any errors.  got:" + error);
+            test.done();
+        });
+    },
 }

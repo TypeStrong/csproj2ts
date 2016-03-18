@@ -10,15 +10,20 @@ declare module csproj2ts {
         VisualStudioVersion?: string;
         TypeScriptVersion?: string;
         ActiveConfiguration?: string;
+        ActivePlatform?: string;
     }
     interface VSProjectDetails extends VSProjectParams {
         DefaultProjectConfiguration?: string;
+        DefaultProjectPlatform?: string;
         DefaultVisualStudioVersion?: string;
         TypeScriptDefaultPropsFilePath?: string;
         TypeScriptDefaultConfiguration?: TypeScriptConfiguration;
     }
     interface TypeScriptConfiguration {
         AdditionalFlags?: string;
+        AllowSyntheticDefaultImports?: boolean;
+        AllowUnusedLabels?: boolean;
+        AllowUnreachableCode?: boolean;
         Charset?: string;
         CodePage?: string;
         CompileBlocked?: boolean;
@@ -27,6 +32,7 @@ declare module csproj2ts {
         EmitDecoratorMetadata?: boolean;
         ExperimentalAsyncFunctions?: boolean;
         ExperimentalDecorators?: boolean;
+        ForceConsistentCasingInFileNames?: boolean;
         GeneratesDeclarations?: boolean;
         InlineSourceMap?: boolean;
         InlineSources?: boolean;
@@ -38,15 +44,20 @@ declare module csproj2ts {
         NewLine?: string;
         NoEmitOnError?: boolean;
         NoEmitHelpers?: boolean;
+        NoFallthroughCasesInSwitch?: boolean;
         NoImplicitAny?: boolean;
+        NoImplicitReturns?: boolean;
+        NoImplicitUseStrict?: boolean;
         NoLib?: boolean;
         NoResolve?: boolean;
         OutFile?: string;
         OutDir?: string;
         PreserveConstEnums?: boolean;
         PreferredUILang?: string;
+        ReactNamespace?: string;
         RemoveComments?: boolean;
         RootDir?: boolean;
+        SkipDefaultLibCheck?: boolean;
         SourceMap?: boolean;
         SourceRoot?: string;
         SuppressImplicitAnyIndexErrors?: boolean;

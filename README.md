@@ -59,21 +59,26 @@ Set breakpoints in the Chrome dev tools, or use `debugger;` where needed.
 The returned settings object has the following documented properties:
 
   * files: string[] - This is an array of the files that will be compiled.
-  * VSProjectDetails - This object has the following properties:
+  * VSProjectDetails - This object has the following properties which correspond to what was passed-in to csproj2ts (not what was found in the project file):
     * ProjectFileName: string
     * MSBuildExtensionsPath32: string
     * VisualStudioVersion: string
     * TypeScriptVersion: string
     * ActiveConfiguration: string
+    * ActivePlatform: string
     * DefaultProjectConfiguration?: string;
+    * DefaultProjectPlatform?: string;
     * DefaultVisualStudioVersion?: string;
     * TypeScriptDefaultPropsFilePath: string;
     * TypeScriptDefaultConfiguration: - this property has the settings (seen below) that correspond to the defaults on the referenced .props file.
 
 
-The returned settings object has the following properties that correspond to TypeScript configuration settings:
+The returned settings object has the following properties that correspond to the TypeScript configuration settings found in the project file:
 
   * AdditionalFlags?: string;
+  * AllowSyntheticDefaultImports?: boolean;
+  * AllowUnusedLabels?: boolean;
+  * AllowUnreachableCode?: boolean;
   * Charset?: string;
   * CodePage?: string;
   * CompileBlocked?: boolean;
@@ -82,6 +87,7 @@ The returned settings object has the following properties that correspond to Typ
   * EmitDecoratorMetadata?: boolean;
   * ExperimentalAsyncFunctions?: boolean;
   * ExperimentalDecorators?: boolean;
+  * ForceConsistentCasingInFileNames?: boolean;
   * GeneratesDeclarations?: boolean;
   * InlineSourceMap?: boolean;
   * InlineSources?: boolean;
@@ -93,15 +99,19 @@ The returned settings object has the following properties that correspond to Typ
   * NewLine?: string;
   * NoEmitOnError?: boolean;
   * NoEmitHelpers?: boolean;
+  * NoFallthroughCasesInSwitch?: boolean;
   * NoImplicitAny?: boolean;
+  * NoImplicitUseStrict?: boolean;
   * NoLib?: boolean;
   * NoResolve?: boolean;
   * OutFile?: string;
   * OutDir?: string;
   * PreserveConstEnums?: boolean;
   * PreferredUILang?: string;
+  * ReactNamespace?: string;
   * RemoveComments?: boolean;
   * RootDir?: boolean;
+  * SkipDefaultLibCheck?: boolean;
   * SourceMap?: boolean;
   * SourceRoot?: string;
   * SuppressImplicitAnyIndexErrors?: boolean;

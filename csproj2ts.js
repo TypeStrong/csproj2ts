@@ -38,7 +38,7 @@ var csproj2ts;
         }
         return csproj2ts.DEFAULT_TYPESCRIPT_VERSION;
     };
-    var getTSSetting = function (project, abbreviatedSettingName, projectConfiguration, defaultValue) {
+    var getTSSetting = function (project, abbreviatedSettingName, projectConfiguration, projectPlatform, defaultValue) {
         var typeOfGrouping = "PropertyGroup";
         var result = defaultValue;
         if (project[typeOfGrouping]) {
@@ -47,7 +47,8 @@ var csproj2ts;
                 if (item["$"] && item["$"]["Condition"]) {
                     var condition = item["$"]["Condition"];
                     condition = condition.replace(/ /g, "");
-                    if (condition === "'$(Configuration)'=='" + projectConfiguration + "'") {
+                    if (condition === "'$(Configuration)'=='" + projectConfiguration + "'" ||
+                        condition === "'$(Configuration)|$(Platform)'=='" + projectConfiguration + "|" + projectPlatform + "'") {
                         result = getSettingOrDefault(item, abbreviatedSettingName, result);
                     }
                 }
@@ -86,54 +87,72 @@ var csproj2ts;
                 else {
                     var project = parsedVSProject.Project;
                     var projectDefaultConfig = getDefaultConfiguration(project);
+                    var projectDefaultPlatform = getDefaultPlatform(project);
                     var projectActiveConfig = projectInfo.ActiveConfiguration || projectDefaultConfig;
+                    var projectActivePlat = projectInfo.ActivePlatform || projectDefaultPlatform;
                     var result = {
                         VSProjectDetails: {
                             DefaultProjectConfiguration: projectDefaultConfig,
+                            DefaultProjectPlatform: projectDefaultPlatform,
                             DefaultVisualStudioVersion: getDefaultVisualStudioVersion(project),
                             TypeScriptDefaultPropsFilePath: getTypeScriptDefaultPropsFilePath(project),
                             ActiveConfiguration: projectInfo.ActiveConfiguration,
+                            ActivePlatform: projectInfo.ActivePlatform,
                             MSBuildExtensionsPath32: projectInfo.MSBuildExtensionsPath32,
                             ProjectFileName: projectInfo.ProjectFileName,
                             VisualStudioVersion: projectInfo.VisualStudioVersion,
                             TypeScriptVersion: csproj2ts.fixVersion(projectInfo.TypeScriptVersion)
                         },
                         files: getTypeScriptFilesToCompile(project),
-                        AdditionalFlags: getTSSetting(project, "AdditionalFlags", projectActiveConfig, undefined),
-                        Charset: getTSSetting(project, "Charset", projectActiveConfig, undefined),
-                        CodePage: getTSSetting(project, "CodePage", projectActiveConfig, undefined),
-                        CompileBlocked: getTSSetting(project, "CompileBlocked", projectActiveConfig, false),
-                        CompileOnSaveEnabled: cboolean(getTSSetting(project, "CompileOnSaveEnabled", projectActiveConfig, undefined)),
-                        EmitBOM: cboolean(getTSSetting(project, "EmitBOM", projectActiveConfig, undefined)),
-                        EmitDecoratorMetadata: cboolean(getTSSetting(project, "EmitDecoratorMetadata", projectActiveConfig, undefined)),
-                        ExperimentalAsyncFunctions: cboolean(getTSSetting(project, "ExperimentalAsyncFunctions", projectActiveConfig, undefined)),
-                        ExperimentalDecorators: cboolean(getTSSetting(project, "ExperimentalDecorators", projectActiveConfig, undefined)),
-                        GeneratesDeclarations: cboolean(getTSSetting(project, "GeneratesDeclarations", projectActiveConfig, undefined)),
-                        InlineSourceMap: cboolean(getTSSetting(project, "InlineSourceMap", projectActiveConfig, undefined)),
-                        InlineSources: cboolean(getTSSetting(project, "InlineSources", projectActiveConfig, undefined)),
-                        IsolatedModules: cboolean(getTSSetting(project, "IsolatedModules", projectActiveConfig, undefined)),
-                        JSXEmit: getTSSetting(project, "JSXEmit", projectActiveConfig, undefined),
-                        MapRoot: getTSSetting(project, "MapRoot", projectActiveConfig, undefined),
-                        ModuleKind: getTSSetting(project, "ModuleKind", projectActiveConfig, undefined),
-                        ModuleResolution: getTSSetting(project, "ModuleResolution", projectActiveConfig, undefined),
-                        NewLine: getTSSetting(project, "NewLine", projectActiveConfig, undefined),
-                        NoEmitOnError: cboolean(getTSSetting(project, "NoEmitOnError", projectActiveConfig, undefined)),
-                        NoEmitHelpers: cboolean(getTSSetting(project, "NoEmitHelpers", projectActiveConfig, undefined)),
-                        NoImplicitAny: cboolean(getTSSetting(project, "NoImplicitAny", projectActiveConfig, undefined)),
-                        NoLib: cboolean(getTSSetting(project, "NoLib", projectActiveConfig, undefined)),
-                        NoResolve: cboolean(getTSSetting(project, "NoResolve", projectActiveConfig, undefined)),
-                        OutDir: getTSSetting(project, "OutDir", projectActiveConfig, undefined),
-                        OutFile: getTSSetting(project, "OutFile", projectActiveConfig, undefined),
-                        PreferredUILang: getTSSetting(project, "PreferredUILang", projectActiveConfig, undefined),
-                        PreserveConstEnums: cboolean(getTSSetting(project, "PreserveConstEnums", projectActiveConfig, undefined)),
-                        RemoveComments: cboolean(getTSSetting(project, "RemoveComments", projectActiveConfig, undefined)),
-                        RootDir: getTSSetting(project, "RootDir", projectActiveConfig, undefined),
-                        SourceMap: cboolean(getTSSetting(project, "SourceMap", projectActiveConfig, undefined)),
-                        SourceRoot: getTSSetting(project, "SourceRoot", projectActiveConfig, undefined),
-                        SuppressImplicitAnyIndexErrors: cboolean(getTSSetting(project, "SuppressImplicitAnyIndexErrors", projectActiveConfig, undefined)),
-                        SuppressExcessPropertyErrors: cboolean(getTSSetting(project, "SuppressExcessPropertyErrors", projectActiveConfig, undefined)),
-                        Target: getTSSetting(project, "Target", projectActiveConfig, undefined)
+                        AdditionalFlags: getTSSetting(project, "AdditionalFlags", projectActiveConfig, projectActivePlat, undefined),
+                        AllowSyntheticDefaultImports: cboolean(getTSSetting(project, "AllowSyntheticDefaultImports", projectActiveConfig, projectActivePlat, undefined)),
+                        AllowUnusedLabels: cboolean(getTSSetting(project, "AllowUnusedLabels", projectActiveConfig, projectActivePlat, undefined)),
+                        AllowUnreachableCode: cboolean(getTSSetting(project, "AllowUnreachableCode", projectActiveConfig, projectActivePlat, undefined)),
+                        Charset: getTSSetting(project, "Charset", projectActiveConfig, projectActivePlat, undefined),
+                        CodePage: getTSSetting(project, "CodePage", projectActiveConfig, projectActivePlat, undefined),
+                        CompileBlocked: getTSSetting(project, "CompileBlocked", projectActiveConfig, projectActivePlat, false),
+                        CompileOnSaveEnabled: cboolean(getTSSetting(project, "CompileOnSaveEnabled", projectActiveConfig, projectActivePlat, undefined)),
+                        EmitBOM: cboolean(getTSSetting(project, "EmitBOM", projectActiveConfig, projectActivePlat, undefined)),
+                        EmitDecoratorMetadata: cboolean(getTSSetting(project, "EmitDecoratorMetadata", projectActiveConfig, projectActivePlat, undefined)),
+                        ExperimentalAsyncFunctions: cboolean(getTSSetting(project, "ExperimentalAsyncFunctions", projectActiveConfig, projectActivePlat, undefined)),
+                        ExperimentalDecorators: cboolean(getTSSetting(project, "ExperimentalDecorators", projectActiveConfig, projectActivePlat, undefined)),
+                        ForceConsistentCasingInFileNames: cboolean(getTSSetting(project, "ForceConsistentCasingInFileNames", projectActiveConfig, projectActivePlat, undefined)),
+                        GeneratesDeclarations: cboolean(getTSSetting(project, "GeneratesDeclarations", projectActiveConfig, projectActivePlat, undefined)),
+                        InlineSourceMap: cboolean(getTSSetting(project, "InlineSourceMap", projectActiveConfig, projectActivePlat, undefined)),
+                        InlineSources: cboolean(getTSSetting(project, "InlineSources", projectActiveConfig, projectActivePlat, undefined)),
+                        IsolatedModules: cboolean(getTSSetting(project, "IsolatedModules", projectActiveConfig, projectActivePlat, undefined)),
+                        JSXEmit: getTSSetting(project, "JSXEmit", projectActiveConfig, projectActivePlat, undefined),
+                        MapRoot: getTSSetting(project, "MapRoot", projectActiveConfig, projectActivePlat, undefined),
+                        ModuleKind: getTSSetting(project, "ModuleKind", projectActiveConfig, projectActivePlat, undefined),
+                        ModuleResolution: getTSSetting(project, "ModuleResolution", projectActiveConfig, projectActivePlat, undefined),
+                        NewLine: getTSSetting(project, "NewLine", projectActiveConfig, projectActivePlat, undefined),
+                        NoEmitOnError: cboolean(getTSSetting(project, "NoEmitOnError", projectActiveConfig, projectActivePlat, undefined)),
+                        NoEmitHelpers: cboolean(getTSSetting(project, "NoEmitHelpers", projectActiveConfig, projectActivePlat, undefined)),
+                        NoFallthroughCasesInSwitch: cboolean(getTSSetting(project, "NoFallthroughCasesInSwitch", projectActiveConfig, projectActivePlat, undefined)),
+                        NoImplicitAny: cboolean(getTSSetting(project, "NoImplicitAny", projectActiveConfig, projectActivePlat, undefined)),
+                        NoImplicitReturns: cboolean(getTSSetting(project, "NoImplicitReturns", projectActiveConfig, projectActivePlat, undefined)),
+                        NoImplicitUseStrict: cboolean(getTSSetting(project, "NoImplicitUseStrict", projectActiveConfig, projectActivePlat, undefined)),
+                        NoLib: cboolean(getTSSetting(project, "NoLib", projectActiveConfig, projectActivePlat, undefined)),
+                        NoResolve: cboolean(getTSSetting(project, "NoResolve", projectActiveConfig, projectActivePlat, undefined)),
+                        OutDir: getTSSetting(project, "OutDir", projectActiveConfig, projectActivePlat, undefined),
+                        OutFile: getTSSetting(project, "OutFile", projectActiveConfig, projectActivePlat, undefined),
+                        PreferredUILang: getTSSetting(project, "PreferredUILang", projectActiveConfig, projectActivePlat, undefined),
+                        PreserveConstEnums: cboolean(getTSSetting(project, "PreserveConstEnums", projectActivePlat, projectActiveConfig, undefined)),
+                        ReactNamespace: getTSSetting(project, "ReactNamespace", projectActiveConfig, projectActivePlat, undefined),
+                        RemoveComments: cboolean(getTSSetting(project, "RemoveComments", projectActiveConfig, projectActivePlat, undefined)),
+                        RootDir: getTSSetting(project, "RootDir", projectActiveConfig, projectActivePlat, undefined),
+                        SkipDefaultLibCheck: getTSSetting(project, "SkipDefaultLibCheck", projectActiveConfig, projectActivePlat, undefined),
+                        SourceMap: cboolean(getTSSetting(project, "SourceMap", projectActiveConfig, projectActivePlat, undefined)),
+                        SourceRoot: getTSSetting(project, "SourceRoot", projectActiveConfig, projectActivePlat, undefined),
+                        SuppressImplicitAnyIndexErrors: cboolean(getTSSetting(project, "SuppressImplicitAnyIndexErrors", projectActiveConfig, projectActivePlat, undefined)),
+                        SuppressExcessPropertyErrors: cboolean(getTSSetting(project, "SuppressExcessPropertyErrors", projectActiveConfig, projectActivePlat, undefined)),
+                        Target: getTSSetting(project, "Target", projectActiveConfig, projectActivePlat, undefined)
                     };
+                    ["OutDir", "OutFile", "SourceRoot", "RootDir", "MapRoot"].forEach(function (item) {
+                        if (result[item]) {
+                            result[item] = result[item].replace(/\\/g, "/");
+                        }
+                    });
                     csproj2ts.getTypeScriptDefaultsFromPropsFileOrDefaults(result)
                         .then(function (typeScriptDefaults) {
                         result.VSProjectDetails.TypeScriptDefaultConfiguration = typeScriptDefaults;
@@ -209,6 +228,9 @@ var csproj2ts;
     };
     var getDefaultConfiguration = function (project) {
         return getVSConfigDefault(project, "PropertyGroup", "Configuration", "'$(Configuration)'==''");
+    };
+    var getDefaultPlatform = function (project) {
+        return getVSConfigDefault(project, "PropertyGroup", "Platform", "'$(Platform)'==''");
     };
     var getTypeScriptFilesToCompile = function (project) {
         var typeOfGrouping = "ItemGroup";
