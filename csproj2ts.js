@@ -213,13 +213,15 @@ var csproj2ts;
     var getTypeScriptFilesToCompile = function (project) {
         var typeOfGrouping = "ItemGroup";
         var result = [];
+        var osPath;
         if (project[typeOfGrouping]) {
             var items = toArray(project[typeOfGrouping]);
             _.map(items, function (item) {
                 if (item["TypeScriptCompile"]) {
                     _.map(toArray(item["TypeScriptCompile"]), function (compileItem) {
                         if (compileItem["$"] && compileItem["$"]["Include"]) {
-                            result.push(compileItem["$"]["Include"]);
+                            osPath = compileItem["$"]["Include"].replace(/\\/g, "/");
+                            result.push(osPath);
                         }
                     });
                 }
