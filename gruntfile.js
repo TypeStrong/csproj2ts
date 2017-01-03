@@ -2,7 +2,7 @@
     grunt.initConfig({
         ts: {
             default: {
-                src: ["**/*.ts", "!node_modules/**/*.ts"],
+                src: ["**/*.ts", "!node_modules/**/*.ts", "!csproj2ts.d.ts", "!tests/tests.d.ts"],
                 options: {
                     target: 'es5',
                     module: 'commonjs',

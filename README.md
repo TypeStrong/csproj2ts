@@ -2,9 +2,9 @@
 
 Queries a Visual Studio project file (.csproj, .vbproj, .njsproj, etc.) for TypeScript configuration information.  Will also find default config in a `Microsoft.TypeScript.Default.props` file, if referenced by the project.
 
-Visual Studio TypeScript settings are documented on the TypeScript wiki [here](https://github.com/Microsoft/TypeScript/wiki/Setting-Compiler-Options-in-MSBuild-projects).
+Visual Studio TypeScript settings are documented on the TypeScript wiki [here](http://www.typescriptlang.org/docs/handbook/compiler-options-in-msbuild.html).
 
-Tested with new project configuration settings in TypeScript 1.6.2.
+Tested with latest project configuration settings in TypeScript 2.1.4.
 
 ## Install
 
@@ -56,7 +56,9 @@ Set breakpoints in the Chrome dev tools, or use `debugger;` where needed.
 
 ## API:
 
-The returned settings object has the following documented properties:
+The main function of csproj2ts, getTypeScriptSettings(), returns a promise.
+
+In the then() result of the promise, the returned settings object has the following documented properties:
 
   * files: string[] - This is an array of the files that will be compiled.
   * VSProjectDetails - This object has the following properties which correspond to what was passed-in to csproj2ts (not what was found in the project file):
@@ -73,7 +75,7 @@ The returned settings object has the following documented properties:
     * TypeScriptDefaultConfiguration: - this property has the settings (seen below) that correspond to the defaults on the referenced .props file.
 
 
-The returned settings object has the following properties that correspond to the TypeScript configuration settings found in the project file:
+The returned settings object also has the following properties that correspond to the TypeScript configuration settings found in the project file:
 
   * AdditionalFlags?: string;
   * AllowSyntheticDefaultImports?: boolean;

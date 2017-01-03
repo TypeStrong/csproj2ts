@@ -38,52 +38,68 @@ namespace csproj2ts {
 
     /** Configuration tags used by Visual Studio TypeScript Project Properties/MSBuild.
      * https://github.com/Microsoft/TypeScript/issues/1712#issuecomment-70574319
-     * https://github.com/Microsoft/TypeScript/wiki/Setting-Compiler-Options-in-MSBuild-projects
+     * http://www.typescriptlang.org/docs/handbook/compiler-options-in-msbuild.html
      * */
     export interface TypeScriptConfiguration {
         AdditionalFlags?: string;
+        // allowJs is not supported in MSBuild.
         AllowSyntheticDefaultImports?: boolean;
-        AllowUnusedLabels?: boolean;
         AllowUnreachableCode?: boolean;
+        AllowUnusedLabels?: boolean;
+        BaseUrl?: string;
         Charset?: string;
         CodePage?: string;
         CompileBlocked?: boolean;
         CompileOnSaveEnabled?: boolean;
+        DeclarationDir?: string;
         EmitBOM?: boolean;
         EmitDecoratorMetadata?: boolean;
         ExperimentalAsyncFunctions?: boolean;
         ExperimentalDecorators?: boolean;
         ForceConsistentCasingInFileNames?: boolean;
         GeneratesDeclarations?: boolean;
+        // help is not supported in MSBuild.
         InlineSourceMap?: boolean;
         InlineSources?: boolean;
+        // init is not supported in MSBuild.
         IsolatedModules?: boolean;
         JSXEmit?: string;
+        // listEmittedFiles and listFiles not supported in MSBuild.
         MapRoot?: string;
         ModuleKind?: string;
         ModuleResolution?: string;
         NewLine?: string;
-        NoEmitOnError?: boolean;
+        // noEmit is not supported in MSBuild.
         NoEmitHelpers?: boolean;
+        NoEmitOnError?: boolean;
         NoFallthroughCasesInSwitch?: boolean;
         NoImplicitAny?: boolean;
         NoImplicitReturns?: boolean;
+        NoImplicitThis?: boolean;
         NoImplicitUseStrict?: boolean;
+        NoUnusedLocals?: boolean;
+        NoUnusedParameters?: boolean;
         NoLib?: boolean;
         NoResolve?: boolean;
         OutFile?: string;
         OutDir?: string;
+        // paths is not supported in MSBuild.
         PreserveConstEnums?: boolean;
+        // pretty is not supported in MSBuild.
         PreferredUILang?: string; // implements --locale
         ReactNamespace?: string;
         RemoveComments?: boolean;
         RootDir?: boolean;
+        // rootDirs not supported in MSBuild.
+        SkipLibCheck?: boolean;
         SkipDefaultLibCheck?: boolean;
         SourceMap?: boolean;
         SourceRoot?: string;
-        SuppressImplicitAnyIndexErrors?: boolean;
+        StrictNullChecks?: boolean;
         SuppressExcessPropertyErrors?: boolean;
+        SuppressImplicitAnyIndexErrors?: boolean;
         Target?: string;
+        // traceResolution, types, typeRoots, and watch not supported in MSBuild.
     }
 
     // Thanks: "timo" http://stackoverflow.com/questions/263965/how-can-i-convert-a-string-to-boolean-in-javascript/28152765#28152765
@@ -194,12 +210,14 @@ namespace csproj2ts {
                         files: getTypeScriptFilesToCompile(project),
                         AdditionalFlags: getTSSetting(project, "AdditionalFlags", projectActiveConfig, projectActivePlat, undefined),
                         AllowSyntheticDefaultImports: cboolean(getTSSetting(project, "AllowSyntheticDefaultImports", projectActiveConfig, projectActivePlat, undefined)),
-                        AllowUnusedLabels: cboolean(getTSSetting(project, "AllowUnusedLabels", projectActiveConfig, projectActivePlat, undefined)),
                         AllowUnreachableCode: cboolean(getTSSetting(project, "AllowUnreachableCode", projectActiveConfig, projectActivePlat, undefined)),
+                        AllowUnusedLabels: cboolean(getTSSetting(project, "AllowUnusedLabels", projectActiveConfig, projectActivePlat, undefined)),
+                        BaseUrl: getTSSetting(project, "BaseUrl", projectActiveConfig, projectActivePlat, undefined),
                         Charset: getTSSetting(project, "Charset", projectActiveConfig, projectActivePlat, undefined),
                         CodePage: getTSSetting(project, "CodePage", projectActiveConfig, projectActivePlat, undefined),
                         CompileBlocked: getTSSetting(project, "CompileBlocked", projectActiveConfig, projectActivePlat, false),
                         CompileOnSaveEnabled: cboolean(getTSSetting(project, "CompileOnSaveEnabled", projectActiveConfig, projectActivePlat, undefined)),
+                        DeclarationDir: getTSSetting(project, "DeclarationDir", projectActiveConfig, projectActivePlat, undefined),
                         EmitBOM: cboolean(getTSSetting(project, "EmitBOM", projectActiveConfig, projectActivePlat, undefined)),
                         EmitDecoratorMetadata: cboolean(getTSSetting(project, "EmitDecoratorMetadata", projectActiveConfig, projectActivePlat, undefined)),
                         ExperimentalAsyncFunctions: cboolean(getTSSetting(project, "ExperimentalAsyncFunctions", projectActiveConfig, projectActivePlat, undefined)),
@@ -214,14 +232,17 @@ namespace csproj2ts {
                         ModuleKind: getTSSetting(project, "ModuleKind", projectActiveConfig, projectActivePlat, undefined),
                         ModuleResolution: getTSSetting(project, "ModuleResolution", projectActiveConfig, projectActivePlat, undefined),
                         NewLine: getTSSetting(project, "NewLine", projectActiveConfig, projectActivePlat, undefined),
-                        NoEmitOnError: cboolean(getTSSetting(project, "NoEmitOnError", projectActiveConfig, projectActivePlat, undefined)),
                         NoEmitHelpers: cboolean(getTSSetting(project, "NoEmitHelpers", projectActiveConfig, projectActivePlat, undefined)),
+                        NoEmitOnError: cboolean(getTSSetting(project, "NoEmitOnError", projectActiveConfig, projectActivePlat, undefined)),
                         NoFallthroughCasesInSwitch: cboolean(getTSSetting(project, "NoFallthroughCasesInSwitch", projectActiveConfig, projectActivePlat, undefined)),
                         NoImplicitAny: cboolean(getTSSetting(project, "NoImplicitAny", projectActiveConfig, projectActivePlat, undefined)),
+                        NoImplicitThis: cboolean(getTSSetting(project, "NoImplicitThis", projectActiveConfig, projectActivePlat, undefined)),
                         NoImplicitReturns: cboolean(getTSSetting(project, "NoImplicitReturns", projectActiveConfig, projectActivePlat, undefined)),
                         NoImplicitUseStrict: cboolean(getTSSetting(project, "NoImplicitUseStrict", projectActiveConfig, projectActivePlat, undefined)),
                         NoLib: cboolean(getTSSetting(project, "NoLib", projectActiveConfig, projectActivePlat, undefined)),
                         NoResolve: cboolean(getTSSetting(project, "NoResolve", projectActiveConfig, projectActivePlat, undefined)),
+                        NoUnusedLocals: cboolean(getTSSetting(project, "NoUnusedLocals", projectActiveConfig, projectActivePlat, undefined)),
+                        NoUnusedParameters: cboolean(getTSSetting(project, "NoUnusedParameters", projectActiveConfig, projectActivePlat, undefined)),
                         OutDir: getTSSetting(project, "OutDir", projectActiveConfig, projectActivePlat, undefined),
                         OutFile: getTSSetting(project, "OutFile", projectActiveConfig, projectActivePlat, undefined),
                         PreferredUILang: getTSSetting(project, "PreferredUILang", projectActiveConfig, projectActivePlat, undefined),
@@ -229,9 +250,11 @@ namespace csproj2ts {
                         ReactNamespace: getTSSetting(project, "ReactNamespace", projectActiveConfig, projectActivePlat, undefined),
                         RemoveComments: cboolean(getTSSetting(project, "RemoveComments", projectActiveConfig, projectActivePlat, undefined)),
                         RootDir: getTSSetting(project, "RootDir", projectActiveConfig, projectActivePlat, undefined),
-                        SkipDefaultLibCheck: getTSSetting(project, "SkipDefaultLibCheck", projectActiveConfig, projectActivePlat, undefined),
+                        SkipDefaultLibCheck: cboolean(getTSSetting(project, "SkipDefaultLibCheck", projectActiveConfig, projectActivePlat, undefined)),
+                        SkipLibCheck: cboolean(getTSSetting(project, "SkipLibCheck", projectActiveConfig, projectActivePlat, undefined)),
                         SourceMap: cboolean(getTSSetting(project, "SourceMap", projectActiveConfig, projectActivePlat, undefined)),
                         SourceRoot: getTSSetting(project, "SourceRoot", projectActiveConfig, projectActivePlat, undefined),
+                        StrictNullChecks: cboolean(getTSSetting(project, "StrictNullChecks", projectActiveConfig, projectActivePlat, undefined)),
                         SuppressImplicitAnyIndexErrors: cboolean(getTSSetting(project, "SuppressImplicitAnyIndexErrors", projectActiveConfig, projectActivePlat, undefined)),
                         SuppressExcessPropertyErrors: cboolean(getTSSetting(project, "SuppressExcessPropertyErrors", projectActiveConfig, projectActivePlat, undefined)),
                         Target: getTSSetting(project, "Target", projectActiveConfig, projectActivePlat, undefined)

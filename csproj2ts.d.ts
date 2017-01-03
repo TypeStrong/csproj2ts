@@ -1,5 +1,5 @@
-declare module csproj2ts {
-    const DEFAULT_TYPESCRIPT_VERSION: string;
+declare namespace csproj2ts {
+    const DEFAULT_TYPESCRIPT_VERSION = "1.6.2";
     interface TypeScriptSettings extends TypeScriptConfiguration {
         VSProjectDetails?: VSProjectDetails;
         files?: string[];
@@ -22,12 +22,14 @@ declare module csproj2ts {
     interface TypeScriptConfiguration {
         AdditionalFlags?: string;
         AllowSyntheticDefaultImports?: boolean;
-        AllowUnusedLabels?: boolean;
         AllowUnreachableCode?: boolean;
+        AllowUnusedLabels?: boolean;
+        BaseUrl?: string;
         Charset?: string;
         CodePage?: string;
         CompileBlocked?: boolean;
         CompileOnSaveEnabled?: boolean;
+        DeclarationDir?: string;
         EmitBOM?: boolean;
         EmitDecoratorMetadata?: boolean;
         ExperimentalAsyncFunctions?: boolean;
@@ -42,12 +44,15 @@ declare module csproj2ts {
         ModuleKind?: string;
         ModuleResolution?: string;
         NewLine?: string;
-        NoEmitOnError?: boolean;
         NoEmitHelpers?: boolean;
+        NoEmitOnError?: boolean;
         NoFallthroughCasesInSwitch?: boolean;
         NoImplicitAny?: boolean;
         NoImplicitReturns?: boolean;
+        NoImplicitThis?: boolean;
         NoImplicitUseStrict?: boolean;
+        NoUnusedLocals?: boolean;
+        NoUnusedParameters?: boolean;
         NoLib?: boolean;
         NoResolve?: boolean;
         OutFile?: string;
@@ -57,11 +62,13 @@ declare module csproj2ts {
         ReactNamespace?: string;
         RemoveComments?: boolean;
         RootDir?: boolean;
+        SkipLibCheck?: boolean;
         SkipDefaultLibCheck?: boolean;
         SourceMap?: boolean;
         SourceRoot?: string;
-        SuppressImplicitAnyIndexErrors?: boolean;
+        StrictNullChecks?: boolean;
         SuppressExcessPropertyErrors?: boolean;
+        SuppressImplicitAnyIndexErrors?: boolean;
         Target?: string;
     }
     const fixVersion: (version: string) => string;

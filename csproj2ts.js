@@ -1,9 +1,10 @@
-var fs = require('fs');
-var xml2js = require('xml2js');
-var _ = require('lodash');
-var path = require('path');
-var es6_promise_1 = require('es6-promise');
-var semver = require('semver');
+"use strict";
+var fs = require("fs");
+var xml2js = require("xml2js");
+var _ = require("lodash");
+var path = require("path");
+var es6_promise_1 = require("es6-promise");
+var semver = require("semver");
 var csproj2ts;
 (function (csproj2ts) {
     csproj2ts.DEFAULT_TYPESCRIPT_VERSION = "1.6.2";
@@ -106,12 +107,14 @@ var csproj2ts;
                         files: getTypeScriptFilesToCompile(project),
                         AdditionalFlags: getTSSetting(project, "AdditionalFlags", projectActiveConfig, projectActivePlat, undefined),
                         AllowSyntheticDefaultImports: cboolean(getTSSetting(project, "AllowSyntheticDefaultImports", projectActiveConfig, projectActivePlat, undefined)),
-                        AllowUnusedLabels: cboolean(getTSSetting(project, "AllowUnusedLabels", projectActiveConfig, projectActivePlat, undefined)),
                         AllowUnreachableCode: cboolean(getTSSetting(project, "AllowUnreachableCode", projectActiveConfig, projectActivePlat, undefined)),
+                        AllowUnusedLabels: cboolean(getTSSetting(project, "AllowUnusedLabels", projectActiveConfig, projectActivePlat, undefined)),
+                        BaseUrl: getTSSetting(project, "BaseUrl", projectActiveConfig, projectActivePlat, undefined),
                         Charset: getTSSetting(project, "Charset", projectActiveConfig, projectActivePlat, undefined),
                         CodePage: getTSSetting(project, "CodePage", projectActiveConfig, projectActivePlat, undefined),
                         CompileBlocked: getTSSetting(project, "CompileBlocked", projectActiveConfig, projectActivePlat, false),
                         CompileOnSaveEnabled: cboolean(getTSSetting(project, "CompileOnSaveEnabled", projectActiveConfig, projectActivePlat, undefined)),
+                        DeclarationDir: getTSSetting(project, "DeclarationDir", projectActiveConfig, projectActivePlat, undefined),
                         EmitBOM: cboolean(getTSSetting(project, "EmitBOM", projectActiveConfig, projectActivePlat, undefined)),
                         EmitDecoratorMetadata: cboolean(getTSSetting(project, "EmitDecoratorMetadata", projectActiveConfig, projectActivePlat, undefined)),
                         ExperimentalAsyncFunctions: cboolean(getTSSetting(project, "ExperimentalAsyncFunctions", projectActiveConfig, projectActivePlat, undefined)),
@@ -126,14 +129,17 @@ var csproj2ts;
                         ModuleKind: getTSSetting(project, "ModuleKind", projectActiveConfig, projectActivePlat, undefined),
                         ModuleResolution: getTSSetting(project, "ModuleResolution", projectActiveConfig, projectActivePlat, undefined),
                         NewLine: getTSSetting(project, "NewLine", projectActiveConfig, projectActivePlat, undefined),
-                        NoEmitOnError: cboolean(getTSSetting(project, "NoEmitOnError", projectActiveConfig, projectActivePlat, undefined)),
                         NoEmitHelpers: cboolean(getTSSetting(project, "NoEmitHelpers", projectActiveConfig, projectActivePlat, undefined)),
+                        NoEmitOnError: cboolean(getTSSetting(project, "NoEmitOnError", projectActiveConfig, projectActivePlat, undefined)),
                         NoFallthroughCasesInSwitch: cboolean(getTSSetting(project, "NoFallthroughCasesInSwitch", projectActiveConfig, projectActivePlat, undefined)),
                         NoImplicitAny: cboolean(getTSSetting(project, "NoImplicitAny", projectActiveConfig, projectActivePlat, undefined)),
+                        NoImplicitThis: cboolean(getTSSetting(project, "NoImplicitThis", projectActiveConfig, projectActivePlat, undefined)),
                         NoImplicitReturns: cboolean(getTSSetting(project, "NoImplicitReturns", projectActiveConfig, projectActivePlat, undefined)),
                         NoImplicitUseStrict: cboolean(getTSSetting(project, "NoImplicitUseStrict", projectActiveConfig, projectActivePlat, undefined)),
                         NoLib: cboolean(getTSSetting(project, "NoLib", projectActiveConfig, projectActivePlat, undefined)),
                         NoResolve: cboolean(getTSSetting(project, "NoResolve", projectActiveConfig, projectActivePlat, undefined)),
+                        NoUnusedLocals: cboolean(getTSSetting(project, "NoUnusedLocals", projectActiveConfig, projectActivePlat, undefined)),
+                        NoUnusedParameters: cboolean(getTSSetting(project, "NoUnusedParameters", projectActiveConfig, projectActivePlat, undefined)),
                         OutDir: getTSSetting(project, "OutDir", projectActiveConfig, projectActivePlat, undefined),
                         OutFile: getTSSetting(project, "OutFile", projectActiveConfig, projectActivePlat, undefined),
                         PreferredUILang: getTSSetting(project, "PreferredUILang", projectActiveConfig, projectActivePlat, undefined),
@@ -141,9 +147,11 @@ var csproj2ts;
                         ReactNamespace: getTSSetting(project, "ReactNamespace", projectActiveConfig, projectActivePlat, undefined),
                         RemoveComments: cboolean(getTSSetting(project, "RemoveComments", projectActiveConfig, projectActivePlat, undefined)),
                         RootDir: getTSSetting(project, "RootDir", projectActiveConfig, projectActivePlat, undefined),
-                        SkipDefaultLibCheck: getTSSetting(project, "SkipDefaultLibCheck", projectActiveConfig, projectActivePlat, undefined),
+                        SkipDefaultLibCheck: cboolean(getTSSetting(project, "SkipDefaultLibCheck", projectActiveConfig, projectActivePlat, undefined)),
+                        SkipLibCheck: cboolean(getTSSetting(project, "SkipLibCheck", projectActiveConfig, projectActivePlat, undefined)),
                         SourceMap: cboolean(getTSSetting(project, "SourceMap", projectActiveConfig, projectActivePlat, undefined)),
                         SourceRoot: getTSSetting(project, "SourceRoot", projectActiveConfig, projectActivePlat, undefined),
+                        StrictNullChecks: cboolean(getTSSetting(project, "StrictNullChecks", projectActiveConfig, projectActivePlat, undefined)),
                         SuppressImplicitAnyIndexErrors: cboolean(getTSSetting(project, "SuppressImplicitAnyIndexErrors", projectActiveConfig, projectActivePlat, undefined)),
                         SuppressExcessPropertyErrors: cboolean(getTSSetting(project, "SuppressExcessPropertyErrors", projectActiveConfig, projectActivePlat, undefined)),
                         Target: getTSSetting(project, "Target", projectActiveConfig, projectActivePlat, undefined)

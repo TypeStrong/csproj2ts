@@ -1,4 +1,5 @@
-var csproj2ts = require('../csproj2ts');
+"use strict";
+var csproj2ts = require("../csproj2ts");
 var programFiles = csproj2ts.programFiles();
 exports.testGroup = {
     setUp: function (callback) {
