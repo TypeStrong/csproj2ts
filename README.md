@@ -4,7 +4,7 @@ Queries a Visual Studio project file (.csproj, .vbproj, .njsproj, etc.) for Type
 
 Visual Studio TypeScript settings are documented on the TypeScript wiki [here](http://www.typescriptlang.org/docs/handbook/compiler-options-in-msbuild.html).
 
-Tested with latest project configuration settings in TypeScript 2.1.4.
+Tested with latest project configuration settings in TypeScript 2.5.3.
 
 ## Install
 
@@ -78,23 +78,30 @@ In the then() result of the promise, the returned settings object has the follow
 The returned settings object also has the following properties that correspond to the TypeScript configuration settings found in the project file:
 
   * AdditionalFlags?: string;
+  * AllowJS?: boolean;
   * AllowSyntheticDefaultImports?: boolean;
   * AllowUnusedLabels?: boolean;
   * AllowUnreachableCode?: boolean;
+  * AlwaysStrict?: boolean;
   * Charset?: string;
+  * CheckJs?: boolean;
   * CodePage?: string;
   * CompileBlocked?: boolean;
   * CompileOnSaveEnabled?: boolean;
+  * DownlevelIteration?: boolean;
   * EmitBOM?: boolean;
   * EmitDecoratorMetadata?: boolean;
   * ExperimentalAsyncFunctions?: boolean;
   * ExperimentalDecorators?: boolean;
   * ForceConsistentCasingInFileNames?: boolean;
   * GeneratesDeclarations?: boolean;
+  * ImportHelpers?: boolean;
   * InlineSourceMap?: boolean;
   * InlineSources?: boolean;
   * IsolatedModules?: boolean;
   * JSXEmit?: string;
+  * JSXFactory?: string;
+  * Lib?: string;
   * MapRoot?: string;
   * ModuleKind?: string;
   * ModuleResolution?: string;
@@ -106,9 +113,11 @@ The returned settings object also has the following properties that correspond t
   * NoImplicitUseStrict?: boolean;
   * NoLib?: boolean;
   * NoResolve?: boolean;
+  * NoStrictGenericChecks?: boolean;
   * OutFile?: string;
   * OutDir?: string;
   * PreserveConstEnums?: boolean;
+  * PreserveSymlinks?: boolean;
   * PreferredUILang?: string;
   * ReactNamespace?: string;
   * RemoveComments?: boolean;

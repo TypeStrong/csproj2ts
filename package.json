@@ -1,20 +1,25 @@
 {
   "name": "csproj2ts",
-  "version": "0.0.8",
+  "version": "1.0.0",
   "description": "Library to parse TypeScript config info from a Visual Studio Project file",
   "main": "csproj2ts.js",
   "dependencies": {
-    "es6-promise": "^4.0.5",
+    "es6-promise": "^4.1.1",
     "lodash": "^4.17.4",
-    "semver": "^5.3.0",
-    "xml2js": "^0.4.17"
+    "semver": "^5.4.1",
+    "xml2js": "^0.4.19"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.80",
+    "@types/node": "^8.0.47",
+    "@types/nodeunit": "0.0.30",
+    "@types/semver": "^5.4.0",
+    "@types/xml2js": "^0.4.0",
     "grunt": "^1.0.1",
     "grunt-contrib-nodeunit": "^1.0.0",
     "grunt-run": "^0.6.0",
-    "grunt-ts": "^4.2.0",
-    "typescript": "^2.1.4"
+    "grunt-ts": "^6.0.0-beta.16",
+    "typescript": "^2.5.3"
   },
   "scripts": {
     "test": "grunt test",

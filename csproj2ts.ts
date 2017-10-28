@@ -7,7 +7,7 @@ import * as semver from 'semver';
 
 namespace csproj2ts {
 
-    export const DEFAULT_TYPESCRIPT_VERSION = "1.6.2";
+    export const DEFAULT_TYPESCRIPT_VERSION = "2.5.3";
 
     export interface TypeScriptSettings extends TypeScriptConfiguration {
         VSProjectDetails?: VSProjectDetails;
@@ -39,19 +39,25 @@ namespace csproj2ts {
     /** Configuration tags used by Visual Studio TypeScript Project Properties/MSBuild.
      * https://github.com/Microsoft/TypeScript/issues/1712#issuecomment-70574319
      * http://www.typescriptlang.org/docs/handbook/compiler-options-in-msbuild.html
+     * Best place to find is by downloading and installing latest TypeScript Visual Studio SDK
+     * And then running `dir /s /b c:\Microsoft.TypeScript.targets` to find the latest one.
+     * The targets file contains the officially supported elements in project files.
      * */
     export interface TypeScriptConfiguration {
         AdditionalFlags?: string;
-        // allowJs is not supported in MSBuild.
+        AllowJS?: boolean;
         AllowSyntheticDefaultImports?: boolean;
         AllowUnreachableCode?: boolean;
         AllowUnusedLabels?: boolean;
+        AlwaysStrict?: boolean;
         BaseUrl?: string;
         Charset?: string;
+        CheckJs?: boolean;
         CodePage?: string;
         CompileBlocked?: boolean;
         CompileOnSaveEnabled?: boolean;
         DeclarationDir?: string;
+        DownlevelIteration?: boolean;
         EmitBOM?: boolean;
         EmitDecoratorMetadata?: boolean;
         ExperimentalAsyncFunctions?: boolean;
@@ -59,12 +65,15 @@ namespace csproj2ts {
         ForceConsistentCasingInFileNames?: boolean;
         GeneratesDeclarations?: boolean;
         // help is not supported in MSBuild.
+        ImportHelpers?: boolean;
         InlineSourceMap?: boolean;
         InlineSources?: boolean;
         // init is not supported in MSBuild.
         IsolatedModules?: boolean;
         JSXEmit?: string;
+        JSXFactory?: string;
         // listEmittedFiles and listFiles not supported in MSBuild.
+        Lib?: string;
         MapRoot?: string;
         ModuleKind?: string;
         ModuleResolution?: string;
@@ -81,10 +90,12 @@ namespace csproj2ts {
         NoUnusedParameters?: boolean;
         NoLib?: boolean;
         NoResolve?: boolean;
+        NoStrictGenericChecks?: boolean;
         OutFile?: string;
         OutDir?: string;
         // paths is not supported in MSBuild.
         PreserveConstEnums?: boolean;
+        PreserveSymlinks?: boolean;
         // pretty is not supported in MSBuild.
         PreferredUILang?: string; // implements --locale
         ReactNamespace?: string;
@@ -95,7 +106,9 @@ namespace csproj2ts {
         SkipDefaultLibCheck?: boolean;
         SourceMap?: boolean;
         SourceRoot?: string;
+        Strict?: boolean;
         StrictNullChecks?: boolean;
+        StripInternal?: boolean;
         SuppressExcessPropertyErrors?: boolean;
         SuppressImplicitAnyIndexErrors?: boolean;
         Target?: string;
@@ -209,25 +222,32 @@ namespace csproj2ts {
                         },
                         files: getTypeScriptFilesToCompile(project),
                         AdditionalFlags: getTSSetting(project, "AdditionalFlags", projectActiveConfig, projectActivePlat, undefined),
+                        AllowJS: cboolean(getTSSetting(project, "AllowJS", projectActiveConfig, projectActivePlat, undefined)),
                         AllowSyntheticDefaultImports: cboolean(getTSSetting(project, "AllowSyntheticDefaultImports", projectActiveConfig, projectActivePlat, undefined)),
                         AllowUnreachableCode: cboolean(getTSSetting(project, "AllowUnreachableCode", projectActiveConfig, projectActivePlat, undefined)),
                         AllowUnusedLabels: cboolean(getTSSetting(project, "AllowUnusedLabels", projectActiveConfig, projectActivePlat, undefined)),
+                        AlwaysStrict: cboolean(getTSSetting(project, "AlwaysStrict", projectActiveConfig, projectActivePlat, undefined)),
                         BaseUrl: getTSSetting(project, "BaseUrl", projectActiveConfig, projectActivePlat, undefined),
                         Charset: getTSSetting(project, "Charset", projectActiveConfig, projectActivePlat, undefined),
+                        CheckJs: cboolean(getTSSetting(project, "CheckJs", projectActiveConfig, projectActivePlat, undefined)),
                         CodePage: getTSSetting(project, "CodePage", projectActiveConfig, projectActivePlat, undefined),
                         CompileBlocked: getTSSetting(project, "CompileBlocked", projectActiveConfig, projectActivePlat, false),
                         CompileOnSaveEnabled: cboolean(getTSSetting(project, "CompileOnSaveEnabled", projectActiveConfig, projectActivePlat, undefined)),
                         DeclarationDir: getTSSetting(project, "DeclarationDir", projectActiveConfig, projectActivePlat, undefined),
+                        DownlevelIteration: cboolean(getTSSetting(project, "DownlevelIteration", projectActiveConfig, projectActivePlat, undefined)),
                         EmitBOM: cboolean(getTSSetting(project, "EmitBOM", projectActiveConfig, projectActivePlat, undefined)),
                         EmitDecoratorMetadata: cboolean(getTSSetting(project, "EmitDecoratorMetadata", projectActiveConfig, projectActivePlat, undefined)),
                         ExperimentalAsyncFunctions: cboolean(getTSSetting(project, "ExperimentalAsyncFunctions", projectActiveConfig, projectActivePlat, undefined)),
                         ExperimentalDecorators: cboolean(getTSSetting(project, "ExperimentalDecorators", projectActiveConfig, projectActivePlat, undefined)),
                         ForceConsistentCasingInFileNames: cboolean(getTSSetting(project, "ForceConsistentCasingInFileNames", projectActiveConfig, projectActivePlat, undefined)),
                         GeneratesDeclarations: cboolean(getTSSetting(project, "GeneratesDeclarations", projectActiveConfig, projectActivePlat, undefined)),
+                        ImportHelpers: cboolean(getTSSetting(project, "ImportHelpers", projectActiveConfig, projectActivePlat, undefined)),
                         InlineSourceMap: cboolean(getTSSetting(project, "InlineSourceMap", projectActiveConfig, projectActivePlat, undefined)),
                         InlineSources: cboolean(getTSSetting(project, "InlineSources", projectActiveConfig, projectActivePlat, undefined)),
                         IsolatedModules: cboolean(getTSSetting(project, "IsolatedModules", projectActiveConfig, projectActivePlat, undefined)),
                         JSXEmit: getTSSetting(project, "JSXEmit", projectActiveConfig, projectActivePlat, undefined),
+                        JSXFactory: getTSSetting(project, "JSXFactory", projectActiveConfig, projectActivePlat, undefined),
+                        Lib: getTSSetting(project, "Lib", projectActiveConfig, projectActivePlat, undefined),
                         MapRoot: getTSSetting(project, "MapRoot", projectActiveConfig, projectActivePlat, undefined),
                         ModuleKind: getTSSetting(project, "ModuleKind", projectActiveConfig, projectActivePlat, undefined),
                         ModuleResolution: getTSSetting(project, "ModuleResolution", projectActiveConfig, projectActivePlat, undefined),
@@ -241,12 +261,14 @@ namespace csproj2ts {
                         NoImplicitUseStrict: cboolean(getTSSetting(project, "NoImplicitUseStrict", projectActiveConfig, projectActivePlat, undefined)),
                         NoLib: cboolean(getTSSetting(project, "NoLib", projectActiveConfig, projectActivePlat, undefined)),
                         NoResolve: cboolean(getTSSetting(project, "NoResolve", projectActiveConfig, projectActivePlat, undefined)),
+                        NoStrictGenericChecks: cboolean(getTSSetting(project, "NoStrictGenericChecks", projectActiveConfig, projectActivePlat, undefined)),
                         NoUnusedLocals: cboolean(getTSSetting(project, "NoUnusedLocals", projectActiveConfig, projectActivePlat, undefined)),
                         NoUnusedParameters: cboolean(getTSSetting(project, "NoUnusedParameters", projectActiveConfig, projectActivePlat, undefined)),
                         OutDir: getTSSetting(project, "OutDir", projectActiveConfig, projectActivePlat, undefined),
                         OutFile: getTSSetting(project, "OutFile", projectActiveConfig, projectActivePlat, undefined),
                         PreferredUILang: getTSSetting(project, "PreferredUILang", projectActiveConfig, projectActivePlat, undefined),
                         PreserveConstEnums: cboolean(getTSSetting(project, "PreserveConstEnums", projectActivePlat, projectActiveConfig, undefined)),
+                        PreserveSymlinks: cboolean(getTSSetting(project, "PreserveSymlinks", projectActiveConfig, projectActivePlat, undefined)),
                         ReactNamespace: getTSSetting(project, "ReactNamespace", projectActiveConfig, projectActivePlat, undefined),
                         RemoveComments: cboolean(getTSSetting(project, "RemoveComments", projectActiveConfig, projectActivePlat, undefined)),
                         RootDir: getTSSetting(project, "RootDir", projectActiveConfig, projectActivePlat, undefined),

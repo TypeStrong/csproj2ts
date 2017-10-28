@@ -1,5 +1,5 @@
 declare namespace csproj2ts {
-    const DEFAULT_TYPESCRIPT_VERSION = "1.6.2";
+    const DEFAULT_TYPESCRIPT_VERSION = "2.5.3";
     interface TypeScriptSettings extends TypeScriptConfiguration {
         VSProjectDetails?: VSProjectDetails;
         files?: string[];
@@ -21,25 +21,32 @@ declare namespace csproj2ts {
     }
     interface TypeScriptConfiguration {
         AdditionalFlags?: string;
+        AllowJS?: boolean;
         AllowSyntheticDefaultImports?: boolean;
         AllowUnreachableCode?: boolean;
         AllowUnusedLabels?: boolean;
+        AlwaysStrict?: boolean;
         BaseUrl?: string;
         Charset?: string;
+        CheckJs?: boolean;
         CodePage?: string;
         CompileBlocked?: boolean;
         CompileOnSaveEnabled?: boolean;
         DeclarationDir?: string;
+        DownlevelIteration?: boolean;
         EmitBOM?: boolean;
         EmitDecoratorMetadata?: boolean;
         ExperimentalAsyncFunctions?: boolean;
         ExperimentalDecorators?: boolean;
         ForceConsistentCasingInFileNames?: boolean;
         GeneratesDeclarations?: boolean;
+        ImportHelpers?: boolean;
         InlineSourceMap?: boolean;
         InlineSources?: boolean;
         IsolatedModules?: boolean;
         JSXEmit?: string;
+        JSXFactory?: string;
+        Lib?: string;
         MapRoot?: string;
         ModuleKind?: string;
         ModuleResolution?: string;
@@ -55,9 +62,11 @@ declare namespace csproj2ts {
         NoUnusedParameters?: boolean;
         NoLib?: boolean;
         NoResolve?: boolean;
+        NoStrictGenericChecks?: boolean;
         OutFile?: string;
         OutDir?: string;
         PreserveConstEnums?: boolean;
+        PreserveSymlinks?: boolean;
         PreferredUILang?: string;
         ReactNamespace?: string;
         RemoveComments?: boolean;
@@ -66,7 +75,9 @@ declare namespace csproj2ts {
         SkipDefaultLibCheck?: boolean;
         SourceMap?: boolean;
         SourceRoot?: string;
+        Strict?: boolean;
         StrictNullChecks?: boolean;
+        StripInternal?: boolean;
         SuppressExcessPropertyErrors?: boolean;
         SuppressImplicitAnyIndexErrors?: boolean;
         Target?: string;
