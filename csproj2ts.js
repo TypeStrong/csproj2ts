@@ -121,6 +121,7 @@ var csproj2ts;
                         DownlevelIteration: cboolean(getTSSetting(project, "DownlevelIteration", projectActiveConfig, projectActivePlat, undefined)),
                         EmitBOM: cboolean(getTSSetting(project, "EmitBOM", projectActiveConfig, projectActivePlat, undefined)),
                         EmitDecoratorMetadata: cboolean(getTSSetting(project, "EmitDecoratorMetadata", projectActiveConfig, projectActivePlat, undefined)),
+                        ESModuleInterop: cboolean(getTSSetting(project, "ESModuleInterop", projectActiveConfig, projectActivePlat, undefined)),
                         ExperimentalAsyncFunctions: cboolean(getTSSetting(project, "ExperimentalAsyncFunctions", projectActiveConfig, projectActivePlat, undefined)),
                         ExperimentalDecorators: cboolean(getTSSetting(project, "ExperimentalDecorators", projectActiveConfig, projectActivePlat, undefined)),
                         ForceConsistentCasingInFileNames: cboolean(getTSSetting(project, "ForceConsistentCasingInFileNames", projectActiveConfig, projectActivePlat, undefined)),
@@ -160,7 +161,10 @@ var csproj2ts;
                         SkipLibCheck: cboolean(getTSSetting(project, "SkipLibCheck", projectActiveConfig, projectActivePlat, undefined)),
                         SourceMap: cboolean(getTSSetting(project, "SourceMap", projectActiveConfig, projectActivePlat, undefined)),
                         SourceRoot: getTSSetting(project, "SourceRoot", projectActiveConfig, projectActivePlat, undefined),
+                        Strict: cboolean(getTSSetting(project, "Strict", projectActiveConfig, projectActivePlat, undefined)),
+                        StrictFunctionTypes: cboolean(getTSSetting(project, "StrictFunctionTypes", projectActiveConfig, projectActivePlat, undefined)),
                         StrictNullChecks: cboolean(getTSSetting(project, "StrictNullChecks", projectActiveConfig, projectActivePlat, undefined)),
+                        StrictPropertyInitialization: cboolean(getTSSetting(project, "StrictPropertyInitialization", projectActiveConfig, projectActivePlat, undefined)),
                         SuppressImplicitAnyIndexErrors: cboolean(getTSSetting(project, "SuppressImplicitAnyIndexErrors", projectActiveConfig, projectActivePlat, undefined)),
                         SuppressExcessPropertyErrors: cboolean(getTSSetting(project, "SuppressExcessPropertyErrors", projectActiveConfig, projectActivePlat, undefined)),
                         Target: getTSSetting(project, "Target", projectActiveConfig, projectActivePlat, undefined)

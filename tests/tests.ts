@@ -17,9 +17,9 @@ export var testGroup: nodeunit.ITestGroup = {
     },
     non_existent_file_returns_null_and_error_message: (test: nodeunit.Test) => {
         test.expect(1);
-        var vsProjInfo = {
+        const vsProjInfo = {
             ProjectFileName: "tests/artifacts/this_does_not_exist.csproj"
-        }
+        };
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
             test.done();
         }).catch((error) => {
@@ -30,9 +30,9 @@ export var testGroup: nodeunit.ITestGroup = {
     },
     find_default_settings: (test: nodeunit.Test) => {
         test.expect(6);
-        var vsProjInfo = {
+        const vsProjInfo = {
             ProjectFileName: "tests/artifacts/example1.csproj",
-        }
+        };
 
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
             test.ok(!!settings, "Expected settings to have a value.");
@@ -49,9 +49,9 @@ export var testGroup: nodeunit.ITestGroup = {
     },
     find_default_settings_vs2015: (test: nodeunit.Test) => {
         test.expect(2);
-        var vsProjInfo = {
+        const vsProjInfo = {
             ProjectFileName: "tests/artifacts/vs2015project.csproj",
-        }
+        };
 
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
             test.equal(settings.VSProjectDetails.DefaultProjectConfiguration, "Debug", "Expected 'Debug' to be the default config.");
@@ -64,11 +64,11 @@ export var testGroup: nodeunit.ITestGroup = {
     },
     use_TypeScript_fallback_configuration_if_referenced_props_file_not_found: (test: nodeunit.Test) => {
         test.expect(2);
-        var vsProjInfo = {
+        const vsProjInfo = {
             ProjectFileName: "tests/artifacts/props_does_not_exist.csproj",
             ActiveConfiguration: "Release",
             TypeScriptVersion: "1.3"
-        }
+        };
 
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
             test.equal(settings.NoEmitOnError, false, "expected TypeScript 1.3 default to emit on error");
@@ -87,9 +87,9 @@ export var testGroup: nodeunit.ITestGroup = {
     },
     find_TypeScript_default_props_file: (test: nodeunit.Test) => {
         test.expect(1);
-        var vsProjInfo = {
+        const vsProjInfo = {
             ProjectFileName: "tests/artifacts/example1.csproj"
-        }
+        };
 
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
             test.equal(csproj2ts.normalizePath(settings.VSProjectDetails.TypeScriptDefaultPropsFilePath, settings),
@@ -104,16 +104,33 @@ export var testGroup: nodeunit.ITestGroup = {
     },
     default_settings_work_with_TypeScript_1_5: (test: nodeunit.Test) => {
         test.expect(3);
-        var vsProjInfo = {
+        const vsProjInfo = {
             ProjectFileName: "tests/artifacts/example1.csproj",
             TypeScriptVersion: "1.5",
             ActiveConfiguration: "Release"
-        }
+        };
 
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
             test.strictEqual( settings.Target, "ES5" , "Expected ES5 default.");
             test.strictEqual(settings.ExperimentalDecorators, undefined,"Expected experimental decorators to be active.")
             test.strictEqual(settings.EmitDecoratorMetadata, undefined,"Expected decorator metadata to be active.")
+            test.done();
+        }).catch((error) => {
+            test.ok(false, "Should not be any errors.");
+            test.done();
+        });
+
+    },
+    typescript_27_settings_work: (test: nodeunit.Test) => {
+        test.expect(2);
+        const vsProjInfo = {
+            ProjectFileName: "tests/artifacts/example1.csproj",
+            TypeScriptVersion: "2.7",
+            ActiveConfiguration: "Debug"
+        };
+        csproj2ts.getTypeScriptSettings(vsProjInfo).then(settings => {
+            test.strictEqual(settings.ESModuleInterop, true );
+            test.strictEqual(settings.StrictPropertyInitialization, true)
             test.done();
         }).catch((error) => {
             test.ok(false, "Should not be any errors.");
@@ -132,9 +149,10 @@ export var testGroup: nodeunit.ITestGroup = {
     },
     identify_all_typeScript_files_properly: (test: nodeunit.Test) => {
         test.expect(2);
-        var vsProjInfo = {
+        const vsProjInfo = {
             ProjectFileName: "tests/artifacts/example1.csproj"
-        }
+        };
+
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
             test.equal(settings.files.length, 16, "Expected to see the correct number of TypeScript files.");
             test.ok(settings.files.indexOf("tasks/ts.ts") !== 0, "Expected to see tasks/ts.ts in the files list.");
@@ -147,7 +165,7 @@ export var testGroup: nodeunit.ITestGroup = {
     fetch_default_properties_properly: (test: nodeunit.Test) => {
         test.expect(18);
 
-        var settings : csproj2ts.TypeScriptSettings = {
+        const settings : csproj2ts.TypeScriptSettings = {
           VSProjectDetails: {
             TypeScriptDefaultPropsFilePath: "tests/artifacts/Microsoft.TypeScript.Default.props"
           }
@@ -183,10 +201,10 @@ export var testGroup: nodeunit.ITestGroup = {
     },
     find_TypeScript_properties_for_Release: (test: nodeunit.Test) => {
         test.expect(2);
-        var vsProjInfo : csproj2ts.VSProjectParams = {
+        const vsProjInfo : csproj2ts.VSProjectParams = {
             ProjectFileName: "tests/artifacts/example1.csproj",
             ActiveConfiguration: "Release"
-        }
+        };
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
             test.equal(settings.RemoveComments, true, "expected remove comments = true for Release");
             test.equal(settings.SourceMap, false, "expected source map = false for Release");
@@ -199,10 +217,10 @@ export var testGroup: nodeunit.ITestGroup = {
     },
     finds_common_properties_when_config_specified: (test: nodeunit.Test) => {
         test.expect(1);
-        var vsProjInfo : csproj2ts.VSProjectParams = {
+        const vsProjInfo : csproj2ts.VSProjectParams = {
             ProjectFileName: "tests/artifacts/hasCommonPropertyGroup.csproj",
             ActiveConfiguration: "Release"
-        }
+        };
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
             test.equal(settings.SourceRoot, "this_is_the_source_root", "expected source root to be = this_is_the_source_root for Release");
             test.done();
@@ -213,9 +231,9 @@ export var testGroup: nodeunit.ITestGroup = {
     },
     finds_common_properties_when_config_not_specified: (test: nodeunit.Test) => {
         test.expect(1);
-        var vsProjInfo : csproj2ts.VSProjectParams = {
+        const vsProjInfo : csproj2ts.VSProjectParams = {
             ProjectFileName: "tests/artifacts/hasCommonPropertyGroup.csproj"
-        }
+        };
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
             test.equal(settings.SourceRoot, "this_is_the_source_root", "expected source root to be = this_is_the_source_root for unspecified config");
             test.done();
@@ -226,9 +244,9 @@ export var testGroup: nodeunit.ITestGroup = {
     },
     vs2015_project_works_as_expected: (test: nodeunit.Test) => {
         test.expect(6);
-        var vsProjInfo = {
+        const vsProjInfo = {
             ProjectFileName: "tests/artifacts/vs2015project.csproj"
-        }
+        };
 
         csproj2ts.getTypeScriptSettings(vsProjInfo).then((settings) => {
             test.equal(settings.OutDir, "C:/REDACTED/PATH/TO/PROJECT/FOLDER/jsOut");

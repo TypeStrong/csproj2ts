@@ -4,7 +4,7 @@ Queries a Visual Studio project file (.csproj, .vbproj, .njsproj, etc.) for Type
 
 Visual Studio TypeScript settings are documented on the TypeScript wiki [here](http://www.typescriptlang.org/docs/handbook/compiler-options-in-msbuild.html).
 
-Tested with latest project configuration settings in TypeScript 2.5.3.
+Tested with latest project configuration settings in TypeScript 2.7.
 
 ## Install
 

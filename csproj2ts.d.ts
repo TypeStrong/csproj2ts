@@ -1,3 +1,4 @@
+import { Promise } from 'es6-promise';
 declare namespace csproj2ts {
     const DEFAULT_TYPESCRIPT_VERSION = "2.5.3";
     interface TypeScriptSettings extends TypeScriptConfiguration {
@@ -38,6 +39,7 @@ declare namespace csproj2ts {
         EmitDecoratorMetadata?: boolean;
         ExperimentalAsyncFunctions?: boolean;
         ExperimentalDecorators?: boolean;
+        ESModuleInterop?: boolean;
         ForceConsistentCasingInFileNames?: boolean;
         GeneratesDeclarations?: boolean;
         ImportHelpers?: boolean;
@@ -76,7 +78,9 @@ declare namespace csproj2ts {
         SourceMap?: boolean;
         SourceRoot?: string;
         Strict?: boolean;
+        StrictFunctionTypes?: boolean;
         StrictNullChecks?: boolean;
+        StrictPropertyInitialization?: boolean;
         StripInternal?: boolean;
         SuppressExcessPropertyErrors?: boolean;
         SuppressImplicitAnyIndexErrors?: boolean;

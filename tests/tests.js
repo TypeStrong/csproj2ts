@@ -107,6 +107,22 @@ exports.testGroup = {
             test.done();
         });
     },
+    typescript_27_settings_work: function (test) {
+        test.expect(2);
+        var vsProjInfo = {
+            ProjectFileName: "tests/artifacts/example1.csproj",
+            TypeScriptVersion: "2.7",
+            ActiveConfiguration: "Debug"
+        };
+        csproj2ts.getTypeScriptSettings(vsProjInfo).then(function (settings) {
+            test.strictEqual(settings.ESModuleInterop, true);
+            test.strictEqual(settings.StrictPropertyInitialization, true);
+            test.done();
+        }).catch(function (error) {
+            test.ok(false, "Should not be any errors.");
+            test.done();
+        });
+    },
     test_fixVersion: function (test) {
         test.expect(5);
         test.equal(csproj2ts.fixVersion("1"), "1.0.0");
