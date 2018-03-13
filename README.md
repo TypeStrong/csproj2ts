@@ -41,6 +41,13 @@ To build and run tests with nodeunit, run `grunt test`.
 
 To build, run tests, and launch the demo script, run `grunt demo`.  (You can also run `node demo.js` directly (assumes `csproj2ts.csproj` in current folder).)
 
+## Publishing:
+
+  * Ensure `grunt test` comes back clean.
+  * Update the `package.json` with the new version number.
+  * Merge work to `master` on GitHub.
+  * Run `npm publish`.
+
 ### Quickstart for debugging with Node Inspector
 
 Install [Node Inspector](https://github.com/node-inspector/node-inspector) via npm:
